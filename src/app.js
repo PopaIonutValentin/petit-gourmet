@@ -6,6 +6,7 @@ const StoreSQLite = require('./models/sesiuni');
 const rutaAutentificare = require('./routes/autentificare');
 const rutaAdmin = require('./routes/admin');
 const rutaRetete = require('./routes/retete');
+const rutaCategorii = require('./routes/categorii');
 
 const SESSION_SECRET = process.env.SESSION_SECRET;
 
@@ -40,6 +41,7 @@ app.use(session
 app.use('/api', rutaAutentificare);
 app.use('/api/admin', rutaAdmin);
 app.use('/api/retete', rutaRetete);
+app.use('/api/categorii', rutaCategorii);
 
 app.use((req, res) =>
 {
