@@ -65,4 +65,11 @@ test('curataReteta pastreaza doar campurile permise', () =>
     assert.equal(curata.titlu, 'Clatite');
     assert.equal(curata.autor_id, undefined);
     assert.deepEqual(curata.ingrediente, [{nume: 'faina', cantitate: '200 g'}]);
-})
+});
+
+test('respinge categoria trimisa ca text', () =>
+{
+    const reteta= retetaValida();
+    reteta.categorie_id = '2';
+    assert.match(valideazaReteta(reteta), /Categoria/);
+});

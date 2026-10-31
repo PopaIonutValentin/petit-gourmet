@@ -3,6 +3,7 @@ const {doarLogat, identificaUtilizatorul} = require('../middleware/acces');
 const {valideazaReteta, curataReteta} = require('../utils/validare-reteta');
 const retete = require('../models/retete');
 const {citesteId} = require('../utils/citeste-id');
+const categorii = require('../models/categorii');
 
 const router = express.Router();
 
@@ -23,6 +24,11 @@ function poateVedea(utilizator, reteta)
     return utilizator.id === reteta.autor_id || utilizator.rol ==='admin';
 }
 
+function categoriaEstePermisa(reteta)
+{
+    return reteta.categorie_id === null || categorii.gasesteCategorie(reteta.categorie_id) !== undefined;
+}
+
 router.post('/', doarLogat, (req, res) =>
 {
     const eroare = valideazaReteta(req.body);
@@ -32,7 +38,14 @@ router.post('/', doarLogat, (req, res) =>
         return res.status(400).json({eroare});
     }
 
-    const id = retete.creeazaReteta(req.utilizator.id, curataReteta(req.body));
+    const reteta = curataReteta(req.body);
+
+    if(!categoriaEstePermisa(reteta))
+    {
+        return res.status(400).json({eroare: 'Categoria aleasa nu exista.'});
+    }
+
+    const id = retete.creeazaReteta(req.utilizator.id, reteta);
 
     res.status(201).json({id});
 });
@@ -89,7 +102,14 @@ router.put('/:id', doarLogat, (req, res) =>
         return res.status(400).json({eroare});
     }
 
-    retete.actualizeazaReteta(idReteta, curataReteta(req.body));
+    const reteta = curataReteta(req.body);
+
+    if(!categoriaEstePermisa(reteta))
+    {
+        return res.status(400).json({eroare: 'Categoria aleasa nu exista.'});
+    }
+
+    retete.actualizeazaReteta(idReteta, reteta);
 
     res.json({mesaj: 'Reteta a fost actualizata.'});
 });
