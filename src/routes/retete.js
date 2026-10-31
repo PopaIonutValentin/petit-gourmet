@@ -2,22 +2,11 @@ const express = require('express');
 const {doarLogat, identificaUtilizatorul} = require('../middleware/acces');
 const {valideazaReteta, curataReteta} = require('../utils/validare-reteta');
 const retete = require('../models/retete');
+const {citesteId} = require('../utils/citeste-id');
 
 const router = express.Router();
 
 const MESAJ_NEGASITA = 'Reteta nu a fost gasita.';
-
-function citesteIdReteta(text)
-{
-    const id = Number(text);
-
-    if(Number.isSafeInteger(id)  && id >= 1)
-    {
-        return id;
-    }
-
-    return null;
-}
 
 function poateVedea(utilizator, reteta)
 {
@@ -50,7 +39,7 @@ router.post('/', doarLogat, (req, res) =>
 
 router.get('/:id', identificaUtilizatorul, (req, res) =>
 {
-    const idReteta = citesteIdReteta(req.params.id);
+    const idReteta = citesteId(req.params.id);
 
     if(idReteta === null)
     {
@@ -74,7 +63,7 @@ router.get('/:id', identificaUtilizatorul, (req, res) =>
 
 router.put('/:id', doarLogat, (req, res) =>
 {
-    const idReteta = citesteIdReteta(req.params.id);
+    const idReteta = citesteId(req.params.id);
 
     if(idReteta === null)
     {
@@ -107,7 +96,7 @@ router.put('/:id', doarLogat, (req, res) =>
 
 router.delete('/:id', doarLogat, (req, res) =>
 {
-    const idReteta = citesteIdReteta(req.params.id);
+    const idReteta = citesteId(req.params.id);
 
     if(idReteta === null)
     {
