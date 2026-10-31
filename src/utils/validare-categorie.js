@@ -1,5 +1,3 @@
-const { valideazaNumeUtilizator } = require("./validare-utilizator");
-
 function valideazaNumeCategorie(nume)
 {
     if(typeof nume !== 'string')

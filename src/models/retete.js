@@ -2,27 +2,30 @@ const db = require('../db');
 const cautaReteta = db.prepare
 (`
     SELECT retete.id, retete.autor_id, utilizatori.nume_utilizator AS autor,
+           retete.categorie_id, categorii.nume AS categorie,
            retete.titlu, retete.descriere, retete.poza, retete.vizibilitate,
            retete.creat_la, retete.actualizat_la
     FROM retete
     JOIN utilizatori ON utilizatori.id = retete.autor_id
+    LEFT JOIN categorii ON categorii.id = retete.categorie_id
     WHERE retete.id = ?  
 `);
 const cautaIngrediente = db.prepare('SELECT nume, cantitate FROM ingrediente WHERE reteta_id = ? ORDER BY id');
 const cautaPasi = db.prepare('SELECT numar, continut FROM pasi WHERE reteta_id = ? ORDER BY numar');
-const insereazaReteta = db.prepare('INSERT INTO retete (autor_id, titlu, descriere, vizibilitate) VALUES (?, ?, ?, ?)');
+const insereazaReteta = db.prepare('INSERT INTO retete (autor_id, categorie_id, titlu, descriere, vizibilitate) VALUES (?, ?, ?, ?, ?)');
 const insereazaIngrediente = db.prepare('INSERT INTO ingrediente (reteta_id, nume, cantitate) VALUES (?, ?, ?)');
 const insereazaPas = db.prepare('INSERT INTO pasi (reteta_id, numar, continut) VALUES (?, ?, ?)');
 const cautaProprietar = db.prepare('SELECT autor_id, vizibilitate FROM retete WHERE id = ?');
 const actualizeazaDateleRetetei = db.prepare
 (`
     UPDATE retete
-    SET titlu = ?, descriere = ?, vizibilitate = ?, actualizat_la = CURRENT_TIMESTAMP
+    SET titlu = ?, descriere = ?, vizibilitate = ?, categorie_id = ?, actualizat_la = CURRENT_TIMESTAMP
     WHERE id = ?
 `);
 const stergeIngrediente = db.prepare('DELETE FROM ingrediente WHERE reteta_id = ?');
 const stergePasi = db.prepare('DELETE FROM pasi WHERE reteta_id = ?'); 
 const stergeRetetaDinBaza = db.prepare('DELETE FROM retete WHERE id = ?');
+
 
 function salveazaIngredienteSiPasi (retetaId, reteta)
 {
@@ -43,7 +46,7 @@ function creeazaReteta (autorId, reteta)
 
     try
     {
-        const rezultat = insereazaReteta.run(autorId, reteta.titlu, reteta.descriere, reteta.vizibilitate);
+        const rezultat = insereazaReteta.run(autorId, reteta.categorie_id ?? null, reteta.titlu, reteta.descriere, reteta.vizibilitate);
         const retetaId = Number(rezultat.lastInsertRowid);
 
         salveazaIngredienteSiPasi(retetaId, reteta);
@@ -83,7 +86,7 @@ function actualizeazaReteta(id, reteta)
 
     try
     {
-        actualizeazaDateleRetetei.run(reteta.titlu, reteta.descriere, reteta.vizibilitate, id);
+        actualizeazaDateleRetetei.run(reteta.titlu, reteta.descriere, reteta.vizibilitate, reteta.categorie_id ?? null, id);
         stergeIngrediente.run(id);
         stergePasi.run(id);
         salveazaIngredienteSiPasi(id, reteta);

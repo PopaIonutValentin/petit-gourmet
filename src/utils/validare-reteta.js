@@ -27,7 +27,7 @@ function valideazaReteta(date)
         return 'Datele retetei lipsesc.';
     }
 
-    const {titlu, descriere, vizibilitate, ingrediente, pasi} = date;
+    const {titlu, descriere, vizibilitate, categorie_id, ingrediente, pasi} = date;
 
     const eroare = verificaText(titlu, 'Titlul', 3, 100)
         ?? verificaText(descriere, 'Descrierea', 10, 2000);
@@ -40,6 +40,13 @@ function valideazaReteta(date)
     if(vizibilitate !== 'public' && vizibilitate !== 'private')
     {
         return 'Vizibilitatea trebuie sa fie public sau private.';
+    }
+
+    const areCategorie = categorie_id !== undefined && categorie_id !== null;
+
+    if(areCategorie && (!Number.isSafeInteger(categorie_id) || categorie_id < 1))
+    {
+        return 'Categoria nu este valida';
     }
 
     if(!Array.isArray(ingrediente) || ingrediente.length < 1 || ingrediente.length > 50)
@@ -87,6 +94,7 @@ function curataReteta(date)
         titlu: date.titlu.trim(),
         descriere: date.descriere.trim(),
         vizibilitate: date.vizibilitate,
+        categorie_id: date.categorie_id ?? null,
         ingrediente: date.ingrediente.map((i) => ({ nume: i.nume.trim(), cantitate: i.cantitate.trim() })),
         pasi: date.pasi.map((p) => p.trim())
     };
