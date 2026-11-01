@@ -26,7 +26,7 @@ test('respinge un fisier RIFF care nu e WebP', () =>
     assert.equal(detecteazaTipImagine(continut), null);
 });
 
-test('respinge un SVG un script', () =>
+test('respinge un SVG cu script', () =>
 {
     assert.equal(detecteazaTipImagine(Buffer.from('<svg><script>alert(1)</script></svg>')), null);
 });
@@ -41,7 +41,7 @@ test('respinge un fisier mai scurt decat semnatura', () =>
     assert.equal(detecteazaTipImagine(Buffer.from([0xFF, 0xD8])), null);
 });
 
-test('respinge o valoare cate nu e in Buffer', () =>
+test('respinge o valoare care nu e Buffer', () =>
 {
     assert.equal(detecteazaTipImagine(undefined), null);
     assert.equal(detecteazaTipImagine('jpeg'), null);
