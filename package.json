@@ -1,29 +1,33 @@
-  {
+{
     "name": "proiect",
     "version": "1.0.0",
     "private": true,
     "description": "",
-    "main": "index.js",
+    "engines": {
+        "node": ">=24.22.2"
+    },
     "scripts": {
-      "start": "node --env-file=.env src/server.js",
-      "dev": "node --watch --env-file=.env src/server.js",
-      "test": "node --test \"tests/**/*.test.js\""
+        "start": "node --env-file=.env src/server.js",
+        "dev": "node --watch --env-file=.env src/server.js",
+        "test": "node --test \"tests/**/*.test.js\""
     },
     "repository": {
-      "type": "git",
-      "url": "git+https://github.com/PopaIonutValentin/proiect.git"
+        "type": "git",
+        "url": "git+https://github.com/PopaIonutValentin/proiect.git"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "type": "commonjs",
     "bugs": {
-      "url": "https://github.com/PopaIonutValentin/proiect/issues"
+        "url": "https://github.com/PopaIonutValentin/proiect/issues"
     },
     "homepage": "https://github.com/PopaIonutValentin/proiect#readme",
     "dependencies": {
-      "express": "5.3.0",
-      "express-session": "1.19.0",
-      "helmet": "8.3.0"
+        "express": "5.3.0",
+        "express-session": "1.19.0",
+        "helmet": "8.3.0",
+        "multer": "2.5.0",
+        "sharp": "0.35.5"
     }
-  }
+}
