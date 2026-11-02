@@ -210,4 +210,14 @@ test('poza retetei private o vede doar autorul', async () =>
 
     assert.equal(raspunsBogdan.status, 404);
     assert.equal(raspunsVizitator.status, 404);
-})
+});
+
+test('stergerea retetei sterge si poza de pe disc', async () =>
+{
+    const numePoza = pozaDinBaza(idRetetaPrivataAna);
+    const raspuns = await fetch(`${adresaServer}/api/retete/${idRetetaPrivataAna}`, {method: 'DELETE', headers: {Cookie: cookieAna}});
+
+    assert.equal(raspuns.status, 200);
+    assert.equal(retete.gasesteProprietar(idRetetaPrivataAna), undefined);
+    assert.equal(fs.existsSync(path.join(FOLDER_TEST, numePoza)), false);
+});

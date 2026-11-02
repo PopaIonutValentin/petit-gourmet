@@ -144,7 +144,7 @@ router.put('/:id', doarLogat, (req, res) =>
     res.json({mesaj: 'Reteta a fost actualizata.'});
 });
 
-router.delete('/:id', doarLogat, (req, res) =>
+router.delete('/:id', doarLogat, async (req, res) =>
 {
     const idReteta = citesteId(req.params.id);
 
@@ -167,8 +167,17 @@ router.delete('/:id', doarLogat, (req, res) =>
 
     retete.stergeReteta(idReteta);
 
+    try
+    {
+        await poze.stergePoza(proprietar.poza);
+    }
+    catch (eroare)
+    {
+        console.warn('Poza retelei sterse nu a putut fi stearsa:', proprietar.poza, eroare.code);
+    }
+
     res.json({mesaj: 'Reteta a fost stearsa.'});
-})
+});
 
 router.post('/:id/poza', doarLogat, doarAutorulRetetei, incarcaPoza, async (req, res) =>
 {
