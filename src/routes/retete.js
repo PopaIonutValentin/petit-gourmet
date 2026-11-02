@@ -215,6 +215,42 @@ router.post('/:id/poza', doarLogat, doarAutorulRetetei, incarcaPoza, async (req,
     }
 
     res.json({mesaj: 'Poza a fost salvata.'});
+});
 
+router.get('/:id/poza' , identificaUtilizatorul, (req, res) =>
+{
+    const idReteta = citesteId(req.params.id);
+
+    if(idReteta === null)
+    {
+        return res.status(404).json({eroare: MESAJ_NEGASITA});
+    }
+
+    const proprietar = retete.gasesteProprietar(idReteta);
+
+    if(!proprietar || !poateVedea (req.utilizator, proprietar))
+    {
+        return res.status(404).json({eroare: MESAJ_NEGASITA});
+    }
+
+    const cale = poze.caleaPozei(proprietar.poza);
+
+    if(cale === null)
+    {
+        return res.status(404).json({eroare: 'Reteta nu are poza.'});
+    }
+
+    if(proprietar.vizibilitate === 'private')
+    {
+        res.set('Cache-Control', 'no-store');
+    }
+
+    res.sendFile(cale, (eroare) =>
+    {
+        if(eroare && !res.headersSent)
+        {
+            res.status(404).json({eroare: 'Poza nu a fost gasita.'});
+        }
+    });
 });
 module.exports = router;

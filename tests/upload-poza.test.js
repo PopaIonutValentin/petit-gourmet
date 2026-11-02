@@ -15,6 +15,7 @@ const app = require('../src/app');
 const utilizatori = require('../src/models/utilizatori');
 const retete = require('../src/models/retete');
 const {hashParola} = require('../src/utils/parola');
+const {detecteazaTipImagine} = require('../src/utils/tip-imagine');
 
 const PAROLA_DE_TEST = 'parola de test destul de lunga pentru test';
 
@@ -23,6 +24,7 @@ let adresaServer;
 let cookieAna;
 let cookieBogdan;
 let idRetetaAna;
+let idRetetaPrivataAna;
 
 function trimitePoza(idReteta, cookie, continut, numeFisier)
 {
@@ -30,6 +32,18 @@ function trimitePoza(idReteta, cookie, continut, numeFisier)
     formular.append('poza', new Blob([continut]), numeFisier);
 
     const optiuni = {method: 'POST', body: formular, headers: {}};
+
+    if(cookie)
+    {
+        optiuni.headers.Cookie = cookie;
+    }
+
+    return fetch(`${adresaServer}/api/retete/${idReteta}/poza`, optiuni);
+}
+
+function cerePoza(idReteta, cookie)
+{
+    const optiuni = {headers: {}};
 
     if(cookie)
     {
@@ -78,6 +92,15 @@ before(async () =>
         descriere: 'Descriere pentru testul de upload',
         vizibilitate: 'public',
         ingrediente: [{nume: 'faina', cantitate: '100 g'}],
+        pasi: ['Amesteca']
+    });
+
+    idRetetaPrivataAna = retete.creeazaReteta(idAna,
+    {
+        titlu: 'Reteta privata a Anei cu poza',
+        descriere: 'Descriere pentru testul de poza privata',
+        vizibilitate: 'private',
+        ingrediente: [{nume: 'zahar', cantitate: '50 g'}],
         pasi: ['Amesteca']
     });
 
@@ -158,3 +181,33 @@ test('respinge un fisier mai mare de 5 MB', async () =>
     assert.equal(pozaDinBaza(idRetetaAna), pozaInainte);
     assert.equal(numarFisiere(), 1);
 });
+
+test('oricine vede poza unei retete publice, ca WebP, cu antete sigure', async () =>
+{
+    const raspuns = await cerePoza(idRetetaAna, null);
+    const continut = Buffer.from(await raspuns.arrayBuffer());
+
+    assert.equal(raspuns.status, 200);
+    assert.equal(raspuns.headers.get('content-type'), 'image/webp');
+    assert.equal(raspuns.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(raspuns.headers.get('cross-origin-resource-policy'), 'same-origin');
+    assert.equal(detecteazaTipImagine(continut), 'webp');
+});
+
+test('poza retetei private o vede doar autorul', async () =>
+{
+    const upload = await trimitePoza(idRetetaPrivataAna, cookieAna, await pozaPng(200,200), 'privata.png');
+    assert.equal(upload.status, 200);
+
+    const raspunsAna = await cerePoza(idRetetaPrivataAna, cookieAna);
+    await raspunsAna.arrayBuffer();
+
+    assert.equal(raspunsAna.status, 200);
+    assert.equal(raspunsAna.headers.get('cache-control'), 'no-store');
+
+    const raspunsBogdan = await cerePoza(idRetetaPrivataAna, cookieBogdan);
+    const raspunsVizitator = await cerePoza(idRetetaPrivataAna, null);
+
+    assert.equal(raspunsBogdan.status, 404);
+    assert.equal(raspunsVizitator.status, 404);
+})
