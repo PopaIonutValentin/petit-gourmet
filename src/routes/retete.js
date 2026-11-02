@@ -4,6 +4,10 @@ const {valideazaReteta, curataReteta} = require('../utils/validare-reteta');
 const retete = require('../models/retete');
 const {citesteId} = require('../utils/citeste-id');
 const categorii = require('../models/categorii');
+const {incarcaPoza} = require('../middleware/incarca-poza');
+const {detecteazaTipImagine} = require('../utils/tip-imagine');
+const {proceseazaPoza} = require('../utils/proceseaza-poza');
+const poze = require('../models/poze');
 
 const router = express.Router();
 
@@ -27,6 +31,32 @@ function poateVedea(utilizator, reteta)
 function categoriaEstePermisa(reteta)
 {
     return reteta.categorie_id === null || categorii.gasesteCategorie(reteta.categorie_id) !== undefined;
+}
+
+function doarAutorulRetetei(req, res, next)
+{
+    const idReteta = citesteId(req.params.id);
+
+    if(idReteta === null)
+    {
+        return res.status(404).json({eroare: MESAJ_NEGASITA});
+    }
+
+    const proprietar = retete.gasesteProprietar(idReteta);
+
+    if(!proprietar || !poateVedea(req.utilizator, proprietar))
+    {
+        return res.status(404).json({eroare: MESAJ_NEGASITA});
+    }
+
+    if(proprietar.autor_id !== req.utilizator.id)
+    {
+        return res.status(403).json({eroare: 'Poti schimba poza doar la retetele tale.'});
+    }
+
+    req.idReteta = idReteta;
+    req.proprietar = proprietar;
+    next();
 }
 
 router.post('/', doarLogat, (req, res) =>
@@ -139,4 +169,45 @@ router.delete('/:id', doarLogat, (req, res) =>
 
     res.json({mesaj: 'Reteta a fost stearsa.'});
 })
+
+router.post('/:id/poza', doarLogat, doarAutorulRetetei, incarcaPoza, async (req, res) =>
+{
+    if(!req.file)
+    {
+        return res.status(400).json({eroare: 'Nu ai trimis nicio poza'});
+    }
+
+    if(detecteazaTipImagine(req.file.buffer) === null)
+    {
+        return res.status(400).json({eroare: 'Poza trebuie sa fie JPEG, PNG sau WebP.'});
+    }
+
+    let pozaProcesata
+
+    try
+    {
+        pozaProcesata = await proceseazaPoza(req.file.buffer);
+    }
+    catch
+    {
+        return res.status(400).json({eroare: 'Poza nu a putut fi procesata'});
+    }
+
+    const numePoza = await poze.salveazaPoza(pozaProcesata);
+
+    try
+    {
+        retete.seteazaPoza(req.idReteta, numePoza);
+    }
+    catch (eroare)
+    {
+        await poze.stergePoza(numePoza);
+        throw eroare;
+    }
+
+    await pozaProcesata.stergePoza(req.proprietar.poza);
+
+    res.json({mesaj: 'Poza a fost salvata.'});
+
+});
 module.exports = router;

@@ -14,7 +14,7 @@ after(() =>
     fs.rmSync(FOLDER_TEST, {recursive: true, force: true});
 });
 
-test('salveaza poca cu nume aleator si o sterge', async () =>
+test('salveaza poza cu nume aleator si o sterge', async () =>
 {
     const numePoza = await poze.salveazaPoza(Buffer.from('continut de proba'));
 
@@ -26,7 +26,7 @@ test('salveaza poca cu nume aleator si o sterge', async () =>
     assert.equal(fs.existsSync(path.join(FOLDER_TEST, numePoza)), false);
 });
 
-test('doua poze primesc nume diferit', async () =>
+test('doua poze primesc nume diferite', async () =>
 {
     const prima = await poze.salveazaPoza(Buffer.from('a'));
     const aDoua = await poze.salveazaPoza(Buffer.from('b'));

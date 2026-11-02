@@ -15,7 +15,7 @@ const cautaPasi = db.prepare('SELECT numar, continut FROM pasi WHERE reteta_id =
 const insereazaReteta = db.prepare('INSERT INTO retete (autor_id, categorie_id, titlu, descriere, vizibilitate) VALUES (?, ?, ?, ?, ?)');
 const insereazaIngrediente = db.prepare('INSERT INTO ingrediente (reteta_id, nume, cantitate) VALUES (?, ?, ?)');
 const insereazaPas = db.prepare('INSERT INTO pasi (reteta_id, numar, continut) VALUES (?, ?, ?)');
-const cautaProprietar = db.prepare('SELECT autor_id, vizibilitate FROM retete WHERE id = ?');
+const cautaProprietar = db.prepare('SELECT autor_id, vizibilitate, poza FROM retete WHERE id = ?');
 const actualizeazaDateleRetetei = db.prepare
 (`
     UPDATE retete
@@ -25,6 +25,7 @@ const actualizeazaDateleRetetei = db.prepare
 const stergeIngrediente = db.prepare('DELETE FROM ingrediente WHERE reteta_id = ?');
 const stergePasi = db.prepare('DELETE FROM pasi WHERE reteta_id = ?'); 
 const stergeRetetaDinBaza = db.prepare('DELETE FROM retete WHERE id = ?');
+const actualizeazaPozaRetetei = db.prepare('UPDATE retete SET poza = ?, actualizat_la = CURRENT_TIMESTAMP WHERE id = ?');
 
 
 function salveazaIngredienteSiPasi (retetaId, reteta)
@@ -105,4 +106,9 @@ function stergeReteta(id)
     stergeRetetaDinBaza.run(id);
 }
 
-module.exports = {creeazaReteta, gasesteReteta, gasesteProprietar, actualizeazaReteta, stergeReteta};
+function seteazaPoza(id, numePoza)
+{
+    actualizeazaPozaRetetei.run(numePoza, id);
+}
+
+module.exports = {creeazaReteta, gasesteReteta, gasesteProprietar, actualizeazaReteta, stergeReteta, seteazaPoza};
