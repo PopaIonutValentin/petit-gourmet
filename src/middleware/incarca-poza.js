@@ -17,7 +17,7 @@ function incarcaPoza(req, res, next)
 {
     incarcare(req, res, (eroare) =>
     {
-        if(eroare instanceof multer.MulterError && eroare.cause === 'LIMIT_FILE_SIZE')
+        if(eroare instanceof multer.MulterError && eroare.code === 'LIMIT_FILE_SIZE')
         {
             return res.status(413).json({eroare: 'Poza poate avea cel mult 5 MB.'});
         }

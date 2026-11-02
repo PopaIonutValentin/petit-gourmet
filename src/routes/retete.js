@@ -174,7 +174,7 @@ router.post('/:id/poza', doarLogat, doarAutorulRetetei, incarcaPoza, async (req,
 {
     if(!req.file)
     {
-        return res.status(400).json({eroare: 'Nu ai trimis nicio poza'});
+        return res.status(400).json({eroare: 'Nu ai trimis nicio poza.'});
     }
 
     if(detecteazaTipImagine(req.file.buffer) === null)
@@ -190,7 +190,7 @@ router.post('/:id/poza', doarLogat, doarAutorulRetetei, incarcaPoza, async (req,
     }
     catch
     {
-        return res.status(400).json({eroare: 'Poza nu a putut fi procesata'});
+        return res.status(400).json({eroare: 'Poza nu a putut fi procesata.'});
     }
 
     const numePoza = await poze.salveazaPoza(pozaProcesata);
@@ -205,7 +205,7 @@ router.post('/:id/poza', doarLogat, doarAutorulRetetei, incarcaPoza, async (req,
         throw eroare;
     }
 
-    await pozaProcesata.stergePoza(req.proprietar.poza);
+    await poze.stergePoza(req.proprietar.poza);
 
     res.json({mesaj: 'Poza a fost salvata.'});
 
