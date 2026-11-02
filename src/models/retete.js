@@ -26,7 +26,7 @@ const stergeIngrediente = db.prepare('DELETE FROM ingrediente WHERE reteta_id = 
 const stergePasi = db.prepare('DELETE FROM pasi WHERE reteta_id = ?'); 
 const stergeRetetaDinBaza = db.prepare('DELETE FROM retete WHERE id = ?');
 const actualizeazaPozaRetetei = db.prepare('UPDATE retete SET poza = ?, actualizat_la = CURRENT_TIMESTAMP WHERE id = ?');
-
+const cautaPozeleFolosite = db.prepare('SELECT poza FROM retete WHERE poza IS NOT NULL');
 
 function salveazaIngredienteSiPasi (retetaId, reteta)
 {
@@ -111,4 +111,8 @@ function seteazaPoza(id, numePoza)
     actualizeazaPozaRetetei.run(numePoza, id);
 }
 
-module.exports = {creeazaReteta, gasesteReteta, gasesteProprietar, actualizeazaReteta, stergeReteta, seteazaPoza};
+function listeazaPozeleFolosite()
+{
+    return cautaPozeleFolosite.all().map((reteta) => reteta.poza);
+}
+module.exports = {creeazaReteta, gasesteReteta, gasesteProprietar, actualizeazaReteta, stergeReteta, seteazaPoza, listeazaPozeleFolosite};

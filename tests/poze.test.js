@@ -1,5 +1,5 @@
 const {test, after} = require('node:test');
-const assert = require('node:assert/strict');
+const assert = require('node:assert');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
@@ -8,6 +8,7 @@ const FOLDER_TEST = fs.mkdtempSync(path.join(os.tmpdir(), 'petiegurmet-poze-'));
 process.env.UPLOADS_DIR = FOLDER_TEST;
 
 const poze = require('../src/models/poze');
+const { equal } = require('node:assert');
 
 after(() =>
 {
@@ -45,7 +46,7 @@ test('caleaPozei refuza numele care ies din folder', () =>
 test('stergePoza nu sterge fisiere cu nume invalid', async () =>
 {
     const fisier = path.join(FOLDER_TEST, 'secret.txt');
-    fs.writeFileSync(fisier, 'ny trebuie sters');
+    fs.writeFileSync(fisier, 'nu trebuie sters');
 
     await poze.stergePoza('secret.txt');
 
@@ -55,4 +56,20 @@ test('stergePoza nu sterge fisiere cu nume invalid', async () =>
 test('stergePoza nu da eroare daca poza nu mai exista', async () =>
 {
     await assert.doesNotReject(poze.stergePoza('00000000-0000-0000-0000-000000000000.webp'));
+});
+
+test('stergePozeOrfane sterge doar pozele nefolosite', async () =>
+{
+    const pozaFolosita = await poze.salveazaPoza(Buffer.from('folosita'));
+    const pozaOrfana = await poze.salveazaPoza(Buffer.from('orfana'));
+    const fisierStrain = path.join(FOLDER_TEST, 'alt_fisier.txt');
+    fs.writeFileSync(fisierStrain, 'nu e o poza');
+
+    await poze.stergePozeOrfane([pozaFolosita]);
+
+    const pozeRamase = fs.readdirSync(FOLDER_TEST).filter((numeFisier) => numeFisier.endsWith('.webp'));
+
+    assert.deepEqual(pozeRamase, [pozaFolosita]);
+    assert.equal(fs.existsSync(path.join(FOLDER_TEST, pozaOrfana)), false);
+    assert.equal(fs.existsSync(fisierStrain), true);
 });

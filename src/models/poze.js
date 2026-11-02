@@ -38,4 +38,31 @@ async function stergePoza(numePoza)
     await fs.promises.rm(cale, {force: true});
 }
 
-module.exports = {salveazaPoza, stergePoza, caleaPozei};
+async function stergePozeOrfane (numePozeFolosite)
+{
+    const pozeFolosite = new Set (numePozeFolosite);
+    const fisiere = await fs.promises.readdir(FOLDER_POZE);
+    let numarSterse = 0;
+
+    for(const numeFisier of fisiere)
+    {
+        if(caleaPozei(numeFisier) === null || pozeFolosite.has(numeFisier))
+        {
+            continue;
+        }
+
+        try
+        {
+            await stergePoza(numeFisier);
+            numarSterse = numarSterse + 1;
+        }
+        catch (eroare)
+        {
+            console.warn('Poza orfana nu a putut fi stearsa:', numeFisier, eroare.code);
+        }
+    }
+
+    return numarSterse;
+}
+
+module.exports = {salveazaPoza, stergePoza, caleaPozei, stergePozeOrfane};

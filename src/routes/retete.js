@@ -205,7 +205,14 @@ router.post('/:id/poza', doarLogat, doarAutorulRetetei, incarcaPoza, async (req,
         throw eroare;
     }
 
-    await poze.stergePoza(req.proprietar.poza);
+    try
+    {
+        await poze.stergePoza(req.proprietar.poza);
+    }
+    catch (eroare)
+    {
+        console.warn('Poza veche nu a putut fi stearsa:', req.proprietar.poza, eroare.code);
+    }
 
     res.json({mesaj: 'Poza a fost salvata.'});
 
