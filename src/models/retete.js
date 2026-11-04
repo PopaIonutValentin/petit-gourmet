@@ -1,4 +1,5 @@
 const db = require('../db');
+const {escapeLike} = require('../utils/escape-like');
 const cautaReteta = db.prepare
 (`
     SELECT retete.id, retete.autor_id, utilizatori.nume_utilizator AS autor,
@@ -27,6 +28,31 @@ const stergePasi = db.prepare('DELETE FROM pasi WHERE reteta_id = ?');
 const stergeRetetaDinBaza = db.prepare('DELETE FROM retete WHERE id = ?');
 const actualizeazaPozaRetetei = db.prepare('UPDATE retete SET poza = ?, actualizat_la = CURRENT_TIMESTAMP WHERE id = ?');
 const cautaPozeleFolosite = db.prepare('SELECT poza FROM retete WHERE poza IS NOT NULL');
+const cautaFeed = db.prepare
+(`
+    SELECT retete.id, retete.titlu, utilizatori.nume_utilizator AS autor,
+           retete.categorie_id, categorii.nume AS categorie,
+           retete.poza IS NOT NULL AS are_poza, retete.creat_la
+    FROM retete
+    JOIN utilizatori ON utilizatori.id = retete.autor_id
+    LEFT JOIN categorii ON categorii.id = retete.categorie_id
+    WHERE retete.vizibilitate = 'public'
+      AND (:dupa IS NULL OR retete.id < :dupa)
+      AND (:categorieId IS NULL OR retete.categorie_id = :categorieId)
+      AND (:tipar IS NULL
+           OR retete.titlu LIKE :tipar ESCAPE '!'
+           OR utilizatori.nume_utilizator LIKE :tipar ESCAPE '!'
+           OR EXISTS
+           (
+               SELECT 1 FROM ingrediente
+               WHERE ingrediente.reteta_id = retete.id
+                 AND ingrediente.nume LIKE :tipar ESCAPE '!'
+           ))
+    ORDER BY retete.id DESC
+    LIMIT :limita
+`);
+    
+
 
 function salveazaIngredienteSiPasi (retetaId, reteta)
 {
@@ -115,4 +141,18 @@ function listeazaPozeleFolosite()
 {
     return cautaPozeleFolosite.all().map((reteta) => reteta.poza);
 }
-module.exports = {creeazaReteta, gasesteReteta, gasesteProprietar, actualizeazaReteta, stergeReteta, seteazaPoza, listeazaPozeleFolosite};
+
+function listeazaFeed(filtre, limita)
+{
+    const tipar = filtre.cauta === null ? null: '%' + escapeLike(filtre.cauta) + '%';
+
+    return cautaFeed.all
+    ({
+        dupa: filtre.dupa,
+        categorieId: filtre.categorieId,
+        tipar: tipar,
+        limita: limita
+    });
+}
+
+module.exports = {creeazaReteta, gasesteReteta, gasesteProprietar, actualizeazaReteta, stergeReteta, seteazaPoza, listeazaPozeleFolosite, listeazaFeed};

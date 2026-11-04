@@ -8,10 +8,12 @@ const {incarcaPoza} = require('../middleware/incarca-poza');
 const {detecteazaTipImagine} = require('../utils/tip-imagine');
 const {proceseazaPoza} = require('../utils/proceseaza-poza');
 const poze = require('../models/poze');
+const {citesteFiltreFeed} = require('../utils/filtre-feed');
 
 const router = express.Router();
 
 const MESAJ_NEGASITA = 'Reteta nu a fost gasita.';
+const MARIME_PAGINA = 20;
 
 function poateVedea(utilizator, reteta)
 {
@@ -58,6 +60,26 @@ function doarAutorulRetetei(req, res, next)
     req.proprietar = proprietar;
     next();
 }
+
+router.get('/', (req, res) =>
+{
+    const rezultat = citesteFiltreFeed(req.query);
+
+    if(rezultat.eroare)
+    {
+        return res.status(400).json({eroare: rezultat.eroare});
+    }
+
+    const gasite = retete.listeazaFeed(rezultat.filtre, MARIME_PAGINA+1);
+    const maiSunt = gasite.length > MARIME_PAGINA;
+    const pagina = gasite.slice(0, MARIME_PAGINA);
+
+    res.json
+    ({
+        retete: pagina,
+        urmatorulCursor: maiSunt ? pagina[pagina.length - 1].id : null
+    });
+});
 
 router.post('/', doarLogat, (req, res) =>
 {
