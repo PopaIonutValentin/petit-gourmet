@@ -13,16 +13,16 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/PopaIonutValentin/proiect.git"
+        "url": "git+https://github.com/PopaIonutValentin/petit-gourmet.git"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "type": "commonjs",
     "bugs": {
-        "url": "https://github.com/PopaIonutValentin/proiect/issues"
+        "url": "https://github.com/PopaIonutValentin/petit-gourmet/issues"
     },
-    "homepage": "https://github.com/PopaIonutValentin/proiect#readme",
+    "homepage": "https://github.com/PopaIonutValentin/petit-gourmet#readme",
     "dependencies": {
         "express": "5.3.0",
         "express-session": "1.19.0",
