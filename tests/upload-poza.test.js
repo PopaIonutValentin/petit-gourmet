@@ -12,12 +12,9 @@ const {test, before, after} = require('node:test');
 const assert = require('node:assert/strict');
 const sharp = require('sharp');
 const app = require('../src/app');
-const utilizatori = require('../src/models/utilizatori');
 const retete = require('../src/models/retete');
-const {hashParola} = require('../src/utils/parola');
 const {detecteazaTipImagine} = require('../src/utils/tip-imagine');
-
-const PAROLA_DE_TEST = 'parola de test destul de lunga pentru test';
+const {PAROLA_DE_TEST, retetaDeTest, creeazaContDeTest} = require('./date-de-test');
 
 let server;
 let adresaServer;
@@ -82,27 +79,11 @@ function numarFisiere()
 
 before(async () =>
 {
-    const parolaHash = await hashParola(PAROLA_DE_TEST);
-    const idAna = utilizatori.creeazaUtilizator('ana', 'ana@exemplu.ro', parolaHash);
-    utilizatori.creeazaUtilizator('bogdan', 'bogdan@exemplu.ro', parolaHash);
+    const idAna = await creeazaContDeTest('ana');
+    await creeazaContDeTest('bogdan');
 
-    idRetetaAna = retete.creeazaReteta(idAna,
-    {
-        titlu: 'Reteta Anei cu poza',
-        descriere: 'Descriere pentru testul de upload',
-        vizibilitate: 'public',
-        ingrediente: [{nume: 'faina', cantitate: '100 g'}],
-        pasi: ['Amesteca']
-    });
-
-    idRetetaPrivataAna = retete.creeazaReteta(idAna,
-    {
-        titlu: 'Reteta privata a Anei cu poza',
-        descriere: 'Descriere pentru testul de poza privata',
-        vizibilitate: 'private',
-        ingrediente: [{nume: 'zahar', cantitate: '50 g'}],
-        pasi: ['Amesteca']
-    });
+    idRetetaAna = retete.creeazaReteta(idAna, retetaDeTest('Reteta Anei cu poza', 'public'));
+    idRetetaPrivataAna = retete.creeazaReteta(idAna, retetaDeTest('Reteta privata a Anei cu poza', 'private'));
 
     server = app.listen(0, '127.0.0.1');
     await new Promise((rezolva) => server.once('listening', rezolva));
