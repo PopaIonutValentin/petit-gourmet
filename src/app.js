@@ -45,24 +45,24 @@ app.use('/api/categorii', rutaCategorii);
 
 app.use((req, res) =>
 {
-    res.status(404).json({ eroare: 'Ruta nu exista'});
+    res.status(404).json({ eroare: 'Ruta nu exista.'});
 });
 
-app.use((err, req, res, next) =>
+app.use((eroare, req, res, next) =>
 {
     if(res.headersSent)
     {
-        return next(err);
+        return next(eroare);
     }
 
-    const status = Number(err.status || err.statusCode) || 500;
+    const status = Number(eroare.status || eroare.statusCode) || 500;
 
     if(status >= 400 && status < 500)
     {
         return res.status(status).json({eroare: 'Cerere invalida.'});
     }
 
-    console.error('Eroare interna: ', err);
+    console.error('Eroare interna: ', eroare);
     res.status(500).json({eroare: 'A aparut o eroare interna pe server.'});
 
 });

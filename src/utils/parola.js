@@ -23,9 +23,9 @@ async function hashParola(parola)
 
 async function verificareParola(parola, textSalvat)
 {
-    const [sareBase64, hashBAse64] = textSalvat.split(':');
+    const [sareBase64, hashBase64] = textSalvat.split(':');
     const sare = Buffer.from(sareBase64, 'base64');
-    const hashSalvat = Buffer.from(hashBAse64, 'base64');
+    const hashSalvat = Buffer.from(hashBase64, 'base64');
 
     const hashNou = await scrypt(parola, sare, hashSalvat.length, SETARI);
 

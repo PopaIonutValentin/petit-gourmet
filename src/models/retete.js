@@ -57,7 +57,7 @@ function creeazaReteta (autorId, reteta)
     }
     catch (eroare)
     {
-        db.exec('ROLLBACK')
+        db.exec('ROLLBACK');
         throw eroare;
     }
 }

@@ -173,7 +173,7 @@ router.delete('/:id', doarLogat, async (req, res) =>
     }
     catch (eroare)
     {
-        console.warn('Poza retelei sterse nu a putut fi stearsa:', proprietar.poza, eroare.code);
+        console.warn('Poza retetei sterse nu a putut fi stearsa:', proprietar.poza, eroare.code);
     }
 
     res.json({mesaj: 'Reteta a fost stearsa.'});
@@ -191,7 +191,7 @@ router.post('/:id/poza', doarLogat, doarAutorulRetetei, incarcaPoza, async (req,
         return res.status(400).json({eroare: 'Poza trebuie sa fie JPEG, PNG sau WebP.'});
     }
 
-    let pozaProcesata
+    let pozaProcesata;
 
     try
     {

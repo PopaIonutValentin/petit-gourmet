@@ -34,7 +34,7 @@ function doarAdmin(req, res, next)
 
     if(req.utilizator.rol !== 'admin')
     {
-        return res.status(403).json({eroare: 'Nu ai permisiune pentru aceasta actiune. '})
+        return res.status(403).json({eroare: 'Nu ai permisiune pentru aceasta actiune.'});
     }
 
     next();

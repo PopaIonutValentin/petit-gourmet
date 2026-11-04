@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const FOLDER_TEST = fs.mkdtempSync(path.join(os.tmpdir(), 'petiegurmet-poze-'));
+const FOLDER_TEST = fs.mkdtempSync(path.join(os.tmpdir(), 'petitgourmet-poze-'));
 process.env.UPLOADS_DIR = FOLDER_TEST;
 
 const poze = require('../src/models/poze');

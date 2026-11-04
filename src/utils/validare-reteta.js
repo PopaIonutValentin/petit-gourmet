@@ -46,7 +46,7 @@ function valideazaReteta(date)
 
     if(areCategorie && (!Number.isSafeInteger(categorie_id) || categorie_id < 1))
     {
-        return 'Categoria nu este valida';
+        return 'Categoria nu este valida.';
     }
 
     if(!Array.isArray(ingrediente) || ingrediente.length < 1 || ingrediente.length > 50)
@@ -58,10 +58,10 @@ function valideazaReteta(date)
     {
         if (typeof ingredient !== 'object' || ingredient === null)
         {
-            return 'Fiecare ingredient trebuie sa aiba nume si cantitate';
+            return 'Fiecare ingredient trebuie sa aiba nume si cantitate.';
         }
 
-        const eroareIngredient = verificaText(ingredient.nume, 'Numele ingredientului',1 , 100)
+        const eroareIngredient = verificaText(ingredient.nume, 'Numele ingredientului', 1, 100)
             ?? verificaText(ingredient.cantitate, 'Cantitate', 1, 50);
 
         if(eroareIngredient)
@@ -72,7 +72,7 @@ function valideazaReteta(date)
 
     if(!Array.isArray(pasi) || pasi.length < 1 || pasi.length > 50)
     {
-        return 'Reteta trebuie sa aiba intre 1 si 50 de pasi';
+        return 'Reteta trebuie sa aiba intre 1 si 50 de pasi.';
     }
 
     for(const pas of pasi)
@@ -95,8 +95,8 @@ function curataReteta(date)
         descriere: date.descriere.trim(),
         vizibilitate: date.vizibilitate,
         categorie_id: date.categorie_id ?? null,
-        ingrediente: date.ingrediente.map((i) => ({ nume: i.nume.trim(), cantitate: i.cantitate.trim() })),
-        pasi: date.pasi.map((p) => p.trim())
+        ingrediente: date.ingrediente.map((ingredient) => ({ nume: ingredient.nume.trim(), cantitate: ingredient.cantitate.trim() })),
+        pasi: date.pasi.map((pas) => pas.trim())
     };
 }
 

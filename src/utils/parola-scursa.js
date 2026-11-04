@@ -15,7 +15,7 @@ async function esteParolaScursa(parola)
         {
             headers:
             {
-                'User-Agent': 'PetieGourmet-proiect-facultate',
+                'User-Agent': 'PetitGourmet-proiect-facultate',
                 'Add-Padding': 'true'
             },
             signal: AbortSignal.timeout(TIMP_MAXIM_MS)

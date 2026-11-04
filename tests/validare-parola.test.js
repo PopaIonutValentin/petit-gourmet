@@ -12,7 +12,7 @@ test('respinge parola peste 128 caractere', () =>
     assert.match(valideazaParola('b'.repeat(130), 'mihai_pop'), /cel mult 128/);
 });
 
-test('respinge o secventa ', () =>
+test('respinge o secventa', () =>
 {
     assert.match(valideazaParola('9876543210987654321', 'andrei.v'), /previzibila/);
 });

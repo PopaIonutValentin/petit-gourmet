@@ -138,7 +138,7 @@ router.post('/logout', (req, res, next) =>
 
 router.get('/eu', doarLogat, (req, res) => 
 {
-    res.set('Cache-Control', 'no-store')
+    res.set('Cache-Control', 'no-store');
     res.json({utilizator: req.utilizator});
 });
 

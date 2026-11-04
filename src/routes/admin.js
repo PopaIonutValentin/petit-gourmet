@@ -48,12 +48,12 @@ router.delete('/categorii/:id', (req, res) =>
 
     if(idCategorie === null || !categorii.gasesteCategorie(idCategorie))
     {
-        return res.status(404).json({eroare: 'Categoria nu a fost gasita'});
+        return res.status(404).json({eroare: 'Categoria nu a fost gasita.'});
     }
 
     categorii.stergeCategorie(idCategorie);
 
-    res.json({mesaj: 'Categoria a fost stearsa. '});
+    res.json({mesaj: 'Categoria a fost stearsa.'});
 });
 
 module.exports = router;

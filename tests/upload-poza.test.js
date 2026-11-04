@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const FOLDER_TEST = fs.mkdtempSync(path.join(os.tmpdir(), 'petiegourmet-upload-'));
+const FOLDER_TEST = fs.mkdtempSync(path.join(os.tmpdir(), 'petitgourmet-upload-'));
 process.env.UPLOADS_DIR = FOLDER_TEST;
 
 const {test, before, after} = require('node:test');

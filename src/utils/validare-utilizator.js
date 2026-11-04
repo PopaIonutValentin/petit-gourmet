@@ -21,7 +21,7 @@ function valideazaEmail(email)
 {
     if(typeof email !== 'string')
     {
-        return 'Emailul este obligatoriu';
+        return 'Emailul este obligatoriu.';
     }
 
     if(email.length > LUNGIME_MAXIMA_EMAIL)
@@ -31,7 +31,7 @@ function valideazaEmail(email)
 
     if(!REGULA_EMAIL.test(email))
     {
-        return 'Emailul nu are un format valid';
+        return 'Emailul nu are un format valid.';
     }
 
     return null;

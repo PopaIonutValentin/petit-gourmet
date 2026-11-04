@@ -4,7 +4,7 @@ const lungimeMaxima = 128;
 const CUVINTE_INTERZISE = new Set
 ([
     'petiegourmet', 'petie', 'gourmet',
-    'retete', 'retata', 'recipe', 'recipes',
+    'retete', 'reteta', 'recipe', 'recipes',
     'parola', 'parolamea', 'password',
     'admin', 'administrator', 'qwerty', 'iloveyou'
 ]);
@@ -68,7 +68,7 @@ function valideazaParola(parola, numeUtilizator)
     }
     if(lungime > lungimeMaxima)
     {
-        return `Parola poate avea cel mult ${lungimeMaxima} caractere`;
+        return `Parola poate avea cel mult ${lungimeMaxima} caractere.`;
     }
 
     const simplificata = parola.toLowerCase();
