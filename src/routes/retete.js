@@ -9,6 +9,8 @@ const {detecteazaTipImagine} = require('../utils/tip-imagine');
 const {proceseazaPoza} = require('../utils/proceseaza-poza');
 const poze = require('../models/poze');
 const {citesteFiltreFeed} = require('../utils/filtre-feed');
+const recenzii = require('../models/recenzii');
+const {valideazaRecenzie, curataRecenzie} = require('../utils/validare-recenzie');
 
 const router = express.Router();
 
@@ -124,6 +126,68 @@ router.get('/:id', identificaUtilizatorul, (req, res) =>
     }
 
     res.json({reteta});
+});
+
+router.get('/:id/recenzii', identificaUtilizatorul, (req, res) =>
+{
+    const idReteta = citesteId(req.params.id);
+
+    if(idReteta === null)
+    {
+        return res.status(404).json({eroare: MESAJ_NEGASITA});
+    }
+
+    const proprietar = retete.gasesteProprietar(idReteta);
+
+    if(!proprietar || !poateVedea(req.utilizator, proprietar))
+    {
+        return res.status(404).json({eroare: MESAJ_NEGASITA});
+    }
+
+    res.json({recenzii: recenzii.listeazaRecenzii(idReteta)});
+});
+
+router.post('/:id/recenzii', doarLogat, (req, res) =>
+{
+    const idReteta = citesteId(req.params.id);
+
+    if(idReteta === null)
+    {
+        return res.status(404).json({eroare: MESAJ_NEGASITA});
+    }
+
+    const proprietar = retete.gasesteProprietar(idReteta);
+
+    if(!proprietar || !poateVedea(req.utilizator, proprietar))
+    {
+        return res.status(404).json({eroare: MESAJ_NEGASITA});
+    }
+
+    if(proprietar.vizibilitate === 'private')
+    {
+        return res.status(403).json({eroare: 'Nu se pot lasa recenzii la retetele private.'});
+    }
+
+    if(proprietar.autor_id === req.utilizator.id)
+    {
+        return res.status(403).json({eroare: 'Nu iti poti recenza propria reteta.'});
+    }
+
+    const eroare = valideazaRecenzie(req.body);
+
+    if(eroare)
+    {
+        return res.status(400).json({eroare});
+    }
+
+    if(recenzii.existaRecenzie(idReteta, req.utilizator.id))
+    {
+        return res.status(409).json({eroare: 'Ai lasat deja o recenzie la aceasta reteta.'});
+    }
+
+    const id = recenzii.creeazaRecenzie(idReteta, req.utilizator.id, curataRecenzie(req.body));
+
+    res.status(201).json({id});
 });
 
 router.put('/:id', doarLogat, (req, res) =>
