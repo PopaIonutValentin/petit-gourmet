@@ -11,26 +11,12 @@ const poze = require('../models/poze');
 const {citesteFiltreFeed} = require('../utils/filtre-feed');
 const recenzii = require('../models/recenzii');
 const {valideazaRecenzie, curataRecenzie} = require('../utils/validare-recenzie');
+const {poateVedea} = require('../utils/poate-vedea');
 
 const router = express.Router();
 
 const MESAJ_NEGASITA = 'Reteta nu a fost gasita.';
 const MARIME_PAGINA = 20;
-
-function poateVedea(utilizator, reteta)
-{
-    if (reteta.vizibilitate === 'public')
-    {
-        return true;
-    }
-
-    if(!utilizator)
-    {
-        return false;
-    }
-
-    return utilizator.id === reteta.autor_id || utilizator.rol ==='admin';
-}
 
 function categoriaEstePermisa(reteta)
 {

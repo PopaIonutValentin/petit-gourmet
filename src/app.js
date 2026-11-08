@@ -7,6 +7,7 @@ const rutaAutentificare = require('./routes/autentificare');
 const rutaAdmin = require('./routes/admin');
 const rutaRetete = require('./routes/retete');
 const rutaCategorii = require('./routes/categorii');
+const rutaRecenzii = require('./routes/recenzii');
 
 const SESSION_SECRET = process.env.SESSION_SECRET;
 
@@ -42,6 +43,7 @@ app.use('/api', rutaAutentificare);
 app.use('/api/admin', rutaAdmin);
 app.use('/api/retete', rutaRetete);
 app.use('/api/categorii', rutaCategorii);
+app.use('/api/recenzii', rutaRecenzii);
 
 app.use((req, res) =>
 {
