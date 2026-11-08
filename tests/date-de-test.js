@@ -21,4 +21,16 @@ async function creeazaContDeTest(numeUtilizator)
     return utilizatori.creeazaUtilizator(numeUtilizator, `${numeUtilizator}@exemplu.ro`, parolaHash);
 }
 
-module.exports = {PAROLA_DE_TEST, retetaDeTest, creeazaContDeTest};
+async function autentificaContDeTest(adresaServer, numeUtilizator)
+{
+    const raspuns = await fetch(`${adresaServer}/api/login`,
+    {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({numeUtilizator: numeUtilizator, parola: PAROLA_DE_TEST})
+    });
+
+    return raspuns.headers.getSetCookie()[0].split(';')[0];
+}
+
+module.exports = {PAROLA_DE_TEST, retetaDeTest, creeazaContDeTest, autentificaContDeTest};

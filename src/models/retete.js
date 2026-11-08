@@ -32,7 +32,9 @@ const cautaFeed = db.prepare
 (`
     SELECT retete.id, retete.titlu, utilizatori.nume_utilizator AS autor,
            retete.categorie_id, categorii.nume AS categorie,
-           retete.poza IS NOT NULL AS are_poza, retete.creat_la
+           retete.poza IS NOT NULL AS are_poza, retete.creat_la,
+           (SELECT ROUND(AVG(recenzii.nota), 1) FROM recenzii WHERE recenzii.reteta_id = retete.id) AS medie_stele,
+           (SELECT COUNT(*) FROM recenzii WHERE recenzii.reteta_id = retete.id) AS numar_recenzii
     FROM retete
     JOIN utilizatori ON utilizatori.id = retete.autor_id
     LEFT JOIN categorii ON categorii.id = retete.categorie_id
