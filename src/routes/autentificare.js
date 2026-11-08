@@ -6,6 +6,7 @@ const {hashParola, verificareParola} = require('../utils/parola');
 const utilizatori = require('../models/utilizatori');
 const {doarLogat} = require('../middleware/acces');
 const incercari = require('../models/incercari');
+const {stergeContulCuPoze} = require('../utils/sterge-cont');
 
 
 const router = express.Router();
@@ -140,6 +141,45 @@ router.get('/eu', doarLogat, (req, res) =>
 {
     res.set('Cache-Control', 'no-store');
     res.json({utilizator: req.utilizator});
+});
+
+router.delete('/eu', doarLogat, async (req, res, next) =>
+{
+    const parola = req.body?.parola;
+
+    if(typeof parola !== 'string')
+    {
+        return res.status(400).json({eroare: 'Introdu parola ca sa stergi contul.'});
+    }
+
+    const cheieNume = req.utilizator.nume_utilizator.toLowerCase();
+
+    if(incercari.numaraIncercari('login_nume', cheieNume, FEREASTRA_LOGIN_MS) >= MAXIM_PE_NUME)
+    {
+        return res.status(429).json({eroare: MESAJ_PREA_MULTE});
+    }
+
+    const contul = utilizatori.gasesteUtilizatorPentruLogin(req.utilizator.nume_utilizator);
+
+    if(!(await verificareParola(parola, contul.parola_hash)))
+    {
+        incercari.inregistreazaIncercare('login_nume', cheieNume);
+        return res.status(403).json({eroare: 'Parola este gresita.'});
+    }
+
+    incercari.stergeIncercari('login_nume', cheieNume);
+    await stergeContulCuPoze(req.utilizator.id);
+
+    req.session.destroy((eroare) =>
+    {
+        if(eroare)
+        {
+            return next(eroare);
+        }
+
+        res.clearCookie('sid');
+        res.json({mesaj: 'Contul a fost sters.'});
+    });
 });
 
 module.exports = router;
