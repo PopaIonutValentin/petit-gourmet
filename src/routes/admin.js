@@ -4,6 +4,7 @@ const utilizatori = require('../models/utilizatori');
 const categorii = require('../models/categorii');
 const {valideazaNumeCategorie} = require('../utils/validare-categorie');
 const {citesteId} = require('../utils/citeste-id');
+const {stergeContulCuPoze} = require('../utils/sterge-cont');
 
 const router = express.Router();
 
@@ -13,6 +14,32 @@ router.get('/utilizatori', (req,res) =>
 {
     res.set('Cache-Control', 'no-store');
     res.json({utilizatori: utilizatori.listeazaUtilizatori() });
+});
+
+router.delete('/utilizatori/:id', async (req, res) =>
+{
+    const idUtilizator = citesteId(req.params.id);
+
+    if(idUtilizator === null)
+    {
+        return res.status(404).json({eroare: 'Utilizatorul nu a fost gasit.'});
+    }
+
+    const utilizator = utilizatori.gasesteDupaId(idUtilizator);
+
+    if(!utilizator)
+    {
+        return res.status(404).json({eroare: 'Utilizatorul nu a fost gasit.'});
+    }
+
+    if(utilizator.rol === 'admin')
+    {
+        return res.status(403).json({eroare: 'Un administrator nu poate fi sters de aici.'});
+    }
+
+    await stergeContulCuPoze(idUtilizator);
+
+    res.json({mesaj: 'Utilizatorul a fost sters.'});
 });
 
 router.get('/categorii', (req, res) =>

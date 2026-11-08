@@ -53,6 +53,7 @@ const cautaFeed = db.prepare
     ORDER BY retete.id DESC
     LIMIT :limita
 `);
+const cautaPozeleAutorului = db.prepare('SELECT poza FROM retete WHERE autor_id = ? AND poza IS NOT NULL');
     
 
 
@@ -156,5 +157,9 @@ function listeazaFeed(filtre, limita)
         limita: limita
     });
 }
+function listeazaPozeleAutorului(autorId)
+{
+    return cautaPozeleAutorului.all(autorId).map((reteta) => reteta.poza);
+}
 
-module.exports = {creeazaReteta, gasesteReteta, gasesteProprietar, actualizeazaReteta, stergeReteta, seteazaPoza, listeazaPozeleFolosite, listeazaFeed};
+module.exports = {creeazaReteta, gasesteReteta, gasesteProprietar, actualizeazaReteta, stergeReteta, seteazaPoza, listeazaPozeleFolosite, listeazaFeed, listeazaPozeleAutorului};

@@ -6,6 +6,7 @@ const inserare = db.prepare('INSERT INTO utilizatori (nume_utilizator, email, pa
 const cautaPentruLogin = db.prepare('SELECT id, parola_hash FROM utilizatori WHERE nume_utilizator = ?');
 const cautaDupaId = db.prepare('SELECT id, nume_utilizator, email, rol FROM utilizatori WHERE id = ?');
 const listeazaToti = db.prepare('SELECT id, nume_utilizator, email, rol, creat_la FROM utilizatori ORDER BY id');
+const stergeDupaId = db.prepare('DELETE FROM utilizatori WHERE id = ?');
 
 function existaNumeUtilizator(numeUtilizator)
 {
@@ -35,4 +36,8 @@ function listeazaUtilizatori()
 {
     return listeazaToti.all();
 }
-module.exports = {existaNumeUtilizator, existaEmail, creeazaUtilizator, gasesteUtilizatorPentruLogin, gasesteDupaId, listeazaUtilizatori}; 
+function stergeUtilizator(id)
+{
+    stergeDupaId.run(id);
+}
+module.exports = {existaNumeUtilizator, existaEmail, creeazaUtilizator, gasesteUtilizatorPentruLogin, gasesteDupaId, listeazaUtilizatori, stergeUtilizator}; 
