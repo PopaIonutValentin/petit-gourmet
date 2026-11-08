@@ -53,4 +53,19 @@ router.put('/:id', doarLogat, gasesteRecenziaVizibila, (req, res) =>
     res.json({mesaj: 'Recenzia a fost actualizata.'});
 });
 
+router.delete('/:id', doarLogat, gasesteRecenziaVizibila, (req, res) =>
+{
+    const esteAutorul = req.recenzie.autor_id === req.utilizator.id;
+    const esteAdmin = req.utilizator.rol === 'admin';
+
+    if(!esteAutorul && !esteAdmin)
+    {
+        return res.status(403).json({eroare: 'Poti sterge doar recenziile tale.'});
+    }
+
+    recenzii.stergeRecenzie(req.recenzie.id);
+
+    res.json({mesaj: 'Recenzia a fost stearsa.'});
+});
+
 module.exports = router;
