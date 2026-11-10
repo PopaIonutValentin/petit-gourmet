@@ -3,7 +3,7 @@ const lungimeMaxima = 128;
 
 const CUVINTE_INTERZISE = new Set
 ([
-    'petiegourmet', 'petie', 'gourmet',
+    'petitgourmet', 'petit', 'gourmet', 'petiegourmet', 'petie',
     'retete', 'reteta', 'recipe', 'recipes',
     'parola', 'parolamea', 'password',
     'admin', 'administrator', 'qwerty', 'iloveyou'
