@@ -8,6 +8,7 @@ const rutaAdmin = require('./routes/admin');
 const rutaRetete = require('./routes/retete');
 const rutaCategorii = require('./routes/categorii');
 const rutaRecenzii = require('./routes/recenzii');
+const rutaInterfata = require('./routes/interfata');
 
 const SESSION_SECRET = process.env.SESSION_SECRET;
 
@@ -44,6 +45,14 @@ app.use('/api/admin', rutaAdmin);
 app.use('/api/retete', rutaRetete);
 app.use('/api/categorii', rutaCategorii);
 app.use('/api/recenzii', rutaRecenzii);
+app.use('/api/recenzii', rutaRecenzii);
+
+app.use('/api', (req, res) =>
+{
+    res.status(404).json({eroare: 'Ruta nu exista.'});
+});
+
+app.use(rutaInterfata);
 
 app.use((req, res) =>
 {
