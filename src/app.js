@@ -11,6 +11,8 @@ const rutaRecenzii = require('./routes/recenzii');
 const rutaInterfata = require('./routes/interfata');
 
 const SESSION_SECRET = process.env.SESSION_SECRET;
+const LIMITA_JSON_GENERALA = '10kb';
+const LIMITA_JSON_RETETA = '400kb';
 
 if(!SESSION_SECRET || SESSION_SECRET.length < 32)
 {
@@ -21,7 +23,13 @@ const app = express();
 
 app.disable('x-powered-by');
 app.use(helmet());
-app.use(express.json({limit: '10kb'}));
+
+const citesteJsonReteta = express.json({limit: LIMITA_JSON_RETETA});
+
+app.post('/api/retete', citesteJsonReteta);
+app.put('/api/retete/:id', citesteJsonReteta);
+app.use(express.json({limit: LIMITA_JSON_GENERALA}));
+
 
 app.use(session
 ({
@@ -44,7 +52,6 @@ app.use('/api', rutaAutentificare);
 app.use('/api/admin', rutaAdmin);
 app.use('/api/retete', rutaRetete);
 app.use('/api/categorii', rutaCategorii);
-app.use('/api/recenzii', rutaRecenzii);
 app.use('/api/recenzii', rutaRecenzii);
 
 app.use('/api', (req, res) =>
