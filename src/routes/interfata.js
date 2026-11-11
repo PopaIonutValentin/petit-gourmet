@@ -1,7 +1,7 @@
 const path = require('node:path');
 const express = require('express');
 
-const folderInterfata = path.join(__dirname, '..', '..', 'client', 'dist');
+const folderInterfata = process.env.INTERFATA_DIR || path.join(__dirname, '..', '..', 'client', 'dist');
 
 const rutaInterfata = express.Router();
 
