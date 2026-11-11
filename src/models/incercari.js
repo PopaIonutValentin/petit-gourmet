@@ -6,13 +6,13 @@ const adauga = db.prepare('INSERT INTO incercari (tip, cheie, creat_la) VALUES (
 const numara = db.prepare('SELECT COUNT(*) AS numar FROM incercari WHERE tip = ? AND cheie = ? AND creat_la > ?');
 const stergeVechi = db.prepare('DELETE FROM incercari WHERE creat_la <= ?');
 const stergePentruCheie = db.prepare('DELETE FROM incercari WHERE tip = ? and cheie = ?');
-
+const stergeDupaId = db.prepare('DELETE FROM incercari WHERE id = ?');
 
 function inregistreazaIncercare(tip, cheie)
 {
     const acum = Date.now();
     stergeVechi.run(acum-PASTRARE_MAXIMA_MS);
-    adauga.run(tip, cheie, acum);
+    return adauga.run(tip, cheie, acum).lastInsertRowid;
 }
 
 function numaraIncercari(tip, cheie, fereastraMS)
@@ -25,4 +25,9 @@ function stergeIncercari(tip, cheie)
     stergePentruCheie.run(tip, cheie);
 }
 
-module.exports = {inregistreazaIncercare, numaraIncercari, stergeIncercari};
+function stergeIncercareDupaId(id)
+{
+    stergeDupaId.run(id);
+}
+
+module.exports = {inregistreazaIncercare, numaraIncercari, stergeIncercari, stergeIncercareDupaId};

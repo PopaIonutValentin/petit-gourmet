@@ -91,17 +91,20 @@ router.post('/login', async (req,res,next) =>
         return res.status(429).json({ eroare: MESAJ_PREA_MULTE});
     }
 
+    incercari.inregistreazaIncercare('login_nume', cheieNume);
+    const idIncercareIp = incercari.inregistreazaIncercare('login_ip', ip);
+
     const utilizator = utilizatori.gasesteUtilizatorPentruLogin(numeUtilizator);
     const hashDeVerificat = utilizator ? utilizator.parola_hash: await hashFalsPromis;
     const parolaCorecta = await verificareParola(parola, hashDeVerificat);
 
     if(!utilizator || !parolaCorecta)
     {
-        incercari.inregistreazaIncercare('login_nume', cheieNume);
-        incercari.inregistreazaIncercare('login_ip', ip);
         return res.status(401).json({eroare: MESAJ_LOGIN_GRESIT});
     }
+
     incercari.stergeIncercari('login_nume', cheieNume);
+    incercari.stergeIncercareDupaId(idIncercareIp);
 
     req.session.regenerate((eroare) =>
     {
@@ -159,13 +162,16 @@ router.delete('/eu', doarLogat, async (req, res, next) =>
         return res.status(429).json({eroare: MESAJ_PREA_MULTE});
     }
 
+    incercari.inregistreazaIncercare('login_nume', cheieNume);
+
     const contul = utilizatori.gasesteUtilizatorPentruLogin(req.utilizator.nume_utilizator);
 
     if(!(await verificareParola(parola, contul.parola_hash)))
     {
-        incercari.inregistreazaIncercare('login_nume', cheieNume);
         return res.status(403).json({eroare: 'Parola este gresita.'});
     }
+
+    incercari.stergeIncercari('login_nume', cheieNume);
 
     incercari.stergeIncercari('login_nume', cheieNume);
     await stergeContulCuPoze(req.utilizator.id);
