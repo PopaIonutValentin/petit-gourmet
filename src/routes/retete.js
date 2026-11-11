@@ -130,6 +130,11 @@ router.get('/:id/recenzii', identificaUtilizatorul, (req, res) =>
         return res.status(404).json({eroare: MESAJ_NEGASITA});
     }
 
+    if(proprietar.vizibilitate === 'private')
+    {
+        res.set('Cache-Control', 'no-store');
+    }
+
     res.json({recenzii: recenzii.listeazaRecenzii(idReteta)});
 });
 

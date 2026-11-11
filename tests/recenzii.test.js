@@ -170,3 +170,11 @@ test('recenzia o sterge autorul ei sau adminul, nu altcineva', async () =>
 
     assert.deepEqual(lista, []);
 });
+
+test('recenziile retetei private au Cache-Control: no-store', async () =>
+{
+    const raspuns = await cerere('GET', `/api/retete/${idRetetaPrivata}/recenzii`, cookieAna);
+
+    assert.equal(raspuns.status, 200);
+    assert.equal(raspuns.headers.get('cache-control'), 'no-store');
+});
