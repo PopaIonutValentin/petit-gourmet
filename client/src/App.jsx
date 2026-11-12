@@ -1,14 +1,10 @@
 import {Routes, Route, Link} from 'react-router';
 import PaginaAutentificare from './pagini/PaginaAutentificare.jsx';
+import PaginaInregistrare from './pagini/PaginaInregistrare.jsx';
 
 function PaginaFeed()
 {
     return <h1>Feed</h1>;
-}
-
-function PaginaInregistrare()
-{
-    return <h1>Inregistrare</h1>
 }
 
 function PaginaNegasita()
