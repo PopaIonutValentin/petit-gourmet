@@ -1,0 +1,53 @@
+@font-face
+{
+    font-family: 'Plus Jakarta Sans';
+    src: url('./fonturi/PlusJakartaSans-Variable.woff2') format('woff2');
+    font-weight: 200 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face
+{
+    font-family: 'Inter';
+    src: url('./fonturi/InterVariable.woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root
+{
+    --culoare-fundal: #FFEDD1;
+    --culoare-card: #FFFFFF;
+    --culoare-text: #291F1D;
+    --culoare-text-secundar: #6E6259;
+    --culoare-buton: #8F5E22;
+    --culoare-text-buton: #FFFFFF;
+    --culoare-accent: #C4812F;
+    --culoare-eroare: #B91C1C;
+    --font-titluri: 'Plus Jakarta Sans', sans-serif;
+    --font-text: 'Inter', sans-serif;
+}
+
+*,
+*::before,
+*::after
+{
+    box-sizing: border-box;
+}
+
+body
+{
+    margin: 0;
+    background-color: var(--culoare-fundal);
+    color: var(--culoare-text);
+    font-family: var(--font-text);
+}
+
+h1,
+h2,
+h3
+{
+    font-family: var(--font-titluri);
+}
