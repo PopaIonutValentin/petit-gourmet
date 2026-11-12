@@ -6,7 +6,7 @@ export async function cerereApi(metoda, cale, corp)
 
     if(corp !== undefined)
     {
-        optiuni.headers['Content-Type'] = 'aplication/json';
+        optiuni.headers['Content-Type'] = 'application/json';
         optiuni.body = JSON.stringify(corp);
     }
 

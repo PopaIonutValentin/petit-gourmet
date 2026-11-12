@@ -1,13 +1,9 @@
 import {Routes, Route, Link} from 'react-router';
+import PaginaAutentificare from './pagini/PaginaAutentificare.jsx';
 
 function PaginaFeed()
 {
     return <h1>Feed</h1>;
-}
-
-function PaginaAutentificare()
-{
-    return <h1>Autentificare</h1>
 }
 
 function PaginaInregistrare()
