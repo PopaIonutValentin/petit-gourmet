@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {Link, useNavigate} from 'react-router';
 import {cerereApi} from '../api.js';
 
-export default function PaginaAutentificare() 
+export default function PaginaAutentificare({laAutentificare}) 
 {
     const [numeUtilizator, seteazaNumeUtilizator] = useState('');
     const [parola, seteazaParola] = useState('');
@@ -19,6 +19,8 @@ export default function PaginaAutentificare()
         try
         {
             await cerereApi('POST', '/login', {numeUtilizator, parola});
+            const raspuns = await cerereApi('GET', '/eu');
+            laAutentificare(raspuns.utilizator);
             navigheaza('/');
         }
         catch (eroareCerere)

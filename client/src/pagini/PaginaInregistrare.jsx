@@ -14,7 +14,7 @@ function numaraCaractere(text)
 
 function descriereParola(parola)
 {
-    const lungime = numaraCaractere;
+    const lungime = numaraCaractere(parola);
     
     if(lungime === 0)
     {
@@ -108,6 +108,7 @@ export default function PaginaInregistrare()
                     id="parola"
                     type="password"
                     autoComplete="new-password"
+                    required
                     minLength={LUNGIME_MINIMA_PAROLA}
                     aria-describedby="indicatieParola"
                     value={parola}
