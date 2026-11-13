@@ -3,13 +3,9 @@ import {Routes, Route, useNavigate} from 'react-router';
 import {cerereApi} from './api.js';
 import PaginaAutentificare from './pagini/PaginaAutentificare.jsx';
 import PaginaInregistrare from './pagini/PaginaInregistrare.jsx';
+import PaginaFeed from './pagini/PaginaFeed.jsx';
 import Meniu from './componente/Meniu.jsx';
 import logo from './imagini/logo-petit-gourmet.webp';
-
-function PaginaFeed()
-{
-    return <h1>Feed</h1>;
-}
 
 function PaginaNegasita()
 {
