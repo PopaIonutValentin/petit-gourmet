@@ -1,8 +1,10 @@
 import {useState, useEffect} from 'react';
-import {Routes, Route, Link, useNavigate} from 'react-router';
+import {Routes, Route, useNavigate} from 'react-router';
 import {cerereApi} from './api.js';
 import PaginaAutentificare from './pagini/PaginaAutentificare.jsx';
 import PaginaInregistrare from './pagini/PaginaInregistrare.jsx';
+import Meniu from './componente/Meniu.jsx';
+import logo from './imagini/logo-petit-gourmet.webp';
 
 function PaginaFeed()
 {
@@ -77,28 +79,30 @@ export default function App()
     }
 
     return (
-        <>
-            <nav>
-                <Link to="/">Feed</Link>
-                {!seVerifica && utilizator && (
-                    <>
-                        <span>{utilizator.nume_utilizator}</span>
-                        <button type="button" onClick={deconecteaza}>Deconectare</button>
-                    </>
-                )}
-                {!seVerifica && !utilizator && (
-                    <>
-                        <Link to="/autentificare">Autentificare</Link>
-                        <Link to="/inregistrare">Inregistrare</Link>
-                    </>
-                )}
-            </nav>
-            <Routes>
+        <div className="aplicatie">
+            <header className="antet-mobil">
+                <img
+                    src={logo}
+                    alt="Petit Gourmet"
+                    className="antet-mobil-logo"
+                    width="480"
+                    height="104"
+                />
+            </header>
+            <Meniu
+                utilizator={utilizator}
+                seVerifica={seVerifica}
+                laDeconectare={deconecteaza}
+            />
+            <main className="continut">
+                <p role="alert">{eroareDeconectare}</p>
+                <Routes>
                     <Route path="/" element={<PaginaFeed />} />
                     <Route path="/autentificare" element={<PaginaAutentificare laAutentificare={seteazaUtilizator} />} />
                     <Route path="/inregistrare" element={<PaginaInregistrare />} />
                     <Route path="*" element={<PaginaNegasita />} />
-            </Routes>
-        </>
+                </Routes>
+            </main>
+        </div>
     );
 }
