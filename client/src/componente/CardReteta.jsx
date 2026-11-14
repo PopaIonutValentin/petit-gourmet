@@ -12,10 +12,10 @@ function textRecenzii(numar)
         return numar + ' de recenzii';
     }
 
-    return numar + ' de recenzii';
+    return numar + ' recenzii';
 }
 
-export default function CardReteta({reteta})
+export default function CardReteta({reteta, laDeschidere})
 {
     return (
         <article className="card-reteta">
@@ -32,7 +32,15 @@ export default function CardReteta({reteta})
                 </div>
             )}
             <div className="card-reteta-text">
-                <h2 className="card-reteta-titlu">{reteta.titlu}</h2>
+                <h2 className="card-reteta-titlu">
+                    <button
+                        type="button"
+                        className="card-reteta-buton"
+                        onClick={() => laDeschidere(reteta.id)}
+                    >
+                        {reteta.titlu}
+                    </button>    
+                </h2>
                 <p className="card-reteta-autor">de {reteta.autor}</p>
                 {reteta.categorie && <p className="card-reteta-categorie">{reteta.categorie}</p>}
                 <p className="card-reteta-stele">
