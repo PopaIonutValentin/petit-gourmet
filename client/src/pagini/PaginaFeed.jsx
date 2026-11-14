@@ -9,6 +9,13 @@ export default function PaginaFeed()
     const [seIncarca, seteazaSeIncarca] = useState(true);
     const [eroare, seteazaEroare] = useState('');
     const [idRetetaDeschisa, seteazaIdRetetaDeschisa] = useState(null);
+    const [pozitieCard, seteazaPozitieCard] = useState(null);
+
+    function deschideReteta(idReteta, dreptunghiCard)
+    {
+        seteazaPozitieCard(dreptunghiCard);
+        seteazaIdRetetaDeschisa(idReteta);
+    }
 
     useEffect(() =>
     {
@@ -55,6 +62,7 @@ export default function PaginaFeed()
             {idRetetaDeschisa !== null && (
                 <PopupReteta
                     idReteta={idRetetaDeschisa}
+                    pozitieCard={pozitieCard}
                     laInchidere={() => seteazaIdRetetaDeschisa(null)}
                 />
             )}
@@ -64,7 +72,7 @@ export default function PaginaFeed()
             <ul className="feed-grila">
                 {retete.map((reteta) => (
                     <li key={reteta.id}>
-                        <CardReteta reteta={reteta} laDeschidere={seteazaIdRetetaDeschisa}/>
+                        <CardReteta reteta={reteta} laDeschidere={deschideReteta}/>
                     </li>
                 ))}
             </ul>

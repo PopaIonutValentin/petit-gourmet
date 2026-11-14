@@ -2,11 +2,15 @@ import {useState, useEffect, useRef} from 'react';
 import {X} from 'lucide-react';
 import {cerereApi} from '../api.js';
 
-export default function PopupReteta({idReteta, laInchidere})
+export default function PopupReteta({idReteta, pozitieCard, laInchidere})
 {
     const [reteta, seteazaReteta] = useState(null);
     const [eroare, seteazaEroare] = useState('');
     const fereastra = useRef(null);
+    const stilFereastra = pozitieCard ? {
+        '--deplasare-x': (pozitieCard.left + pozitieCard.width / 2 - window.innerWidth / 2) + 'px',
+        '--deplasare-y': (pozitieCard.top + pozitieCard.height / 2 - window.innerHeight / 2) + 'px'
+    } : {};
 
     useEffect(() =>
     {
@@ -52,6 +56,7 @@ export default function PopupReteta({idReteta, laInchidere})
         <dialog
             ref={fereastra}
             className="popup"
+            style={stilFereastra}
             closedby="any"
             aria-labelledby="titluPopup"
             onClose={laInchidere}

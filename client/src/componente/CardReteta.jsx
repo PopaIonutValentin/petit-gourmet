@@ -36,7 +36,7 @@ export default function CardReteta({reteta, laDeschidere})
                     <button
                         type="button"
                         className="card-reteta-buton"
-                        onClick={() => laDeschidere(reteta.id)}
+                        onClick={(eveniment) => laDeschidere(reteta.id, eveniment.currentTarget.closest('.card-reteta').getBoundingClientRect())}
                     >
                         {reteta.titlu}
                     </button>    
