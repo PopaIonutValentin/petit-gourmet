@@ -1,9 +1,11 @@
-import {NavLink} from 'react-router';
+import {NavLink, useLocation} from 'react-router';
 import {House, Search, SquarePlus, User, ShieldCheck, LogIn, UserPlus, LogOut} from 'lucide-react';
 import logo from '../imagini/logo-petit-gourmet.webp';
 
-export default function Meniu({utilizator, seVerifica, laDeconectare})
+export default function Meniu({utilizator, seVerifica, laDeconectare, laCautare})
 {
+    const locatie = useLocation();
+
     return (
         <nav className="meniu" aria-label="Meniul Principal">
             <img
@@ -17,10 +19,15 @@ export default function Meniu({utilizator, seVerifica, laDeconectare})
                 <House />
                 <span>Feed</span>
             </NavLink>
-            <NavLink to="/cautare" className="meniu-legatura">
+            <button
+                type="button"
+                className={locatie.pathname === '/cautare' ? 'meniu-legatura active' : 'meniu-legatura'}
+                aria-haspopup="dialog"
+                onClick={(eveniment) => laCautare(eveniment.currentTarget.getBoundingClientRect())}
+            >
                 <Search />
                 <span>Cautare</span>
-            </NavLink>
+            </button> 
             {!seVerifica && utilizator &&(
                 <>
                     <NavLink to="/retete/noua" className="meniu-legatura">
