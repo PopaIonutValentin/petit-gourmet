@@ -1,10 +1,11 @@
+import {useState} from 'react';
 import {ChefHat, Star} from 'lucide-react';
 
 function textRecenzii(numar)
 {
     if(numar === 1)
     {
-        return '1 recenzie'
+        return '1 recenzie';
     }
 
     if(numar >= 20 && (numar % 100 === 0 || numar % 100 >= 20))
@@ -17,14 +18,19 @@ function textRecenzii(numar)
 
 export default function CardReteta({reteta, laDeschidere})
 {
+    const [pozaIncarcata, seteazaPozaIncarcata] = useState(false);
+    const [pozaEsuata, seteazaPozaEsuata] = useState(false);
+
     return (
         <article className="card-reteta">
-            {reteta.are_poza ? (
+            {reteta.are_poza && !pozaEsuata ? (
                 <img 
                     src={`/api/retete/${reteta.id}/poza`}
                     alt=""
-                    className="card-reteta-poza"
+                    className={pozaIncarcata ? 'card-reteta-poza' : 'card-reteta-poza card-reteta-poza-schelet'}
                     loading="lazy"
+                    onLoad={() => seteazaPozaIncarcata(true)}
+                    onError={() => seteazaPozaEsuata(true)}
                 />
             ) : (
                 <div className="card-reteta-poza card-reteta-fara-poza">

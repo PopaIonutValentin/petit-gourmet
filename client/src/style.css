@@ -170,6 +170,28 @@ h3
     height: 48px;
 }
 
+.card-reteta-poza-schelet
+{
+    background-color: var(--culoare-fundal);
+    animation: pulsare 1.5s ease-in-out infinite;
+}
+
+@keyframes pulsare
+{
+    50%
+    {
+        opacity: 0.5;
+    }
+}
+
+@media (prefers-reduced-motion: reduce)
+{
+    .card-reteta-poza-schelet
+    {
+        animation: none;
+    }
+}
+
 .card-reteta-text
 {
     padding: 16px;
@@ -203,6 +225,36 @@ h3
     width: 16px;
     height: 16px;
     color: var(--culoare-accent);
+}
+
+.card-reteta-buton
+{
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.card-reteta-buton::after
+{
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.card-reteta-buton:focus-visible
+{
+    outline: none;
+}
+
+.card-reteta-buton:focus-visible::after
+{
+    outline: 3px solid var(--culoare-accent);
+    outline-offset: -3px;
+    border-radius: 16px;
 }
 
 .popup
@@ -322,36 +374,6 @@ h3
 .card-reteta:hover
 {
     box-shadow: 0 6px 20px rgba(41, 31, 29, 0.16);
-}
-
-.card-reteta-buton
-{
-    padding: 0;
-    border: none;
-    background: none;
-    color: inherit;
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-}
-
-.card-reteta-buton::after
-{
-    content: "";
-    position: absolute;
-    inset: 0;
-}
-
-.card-reteta-buton:focus-visible
-{
-    outline: none;
-}
-
-.card-reteta-buton:focus-visible::after
-{
-    outline: 3px solid var(--culoare-accent);
-    outline-offset: -3px;
-    border-radius: 16px;
 }
 
 .recenzii
