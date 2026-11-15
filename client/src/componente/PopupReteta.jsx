@@ -1,6 +1,9 @@
 import {useState, useEffect, useRef} from 'react';
 import {X} from 'lucide-react';
 import {cerereApi} from '../api.js';
+import RecenziiReteta from './RecenziiReteta.jsx';
+
+const DURATA_ANIMATIE = 300;
 
 export default function PopupReteta({idReteta, pozitieCard, laInchidere})
 {
@@ -11,6 +14,11 @@ export default function PopupReteta({idReteta, pozitieCard, laInchidere})
         '--deplasare-x': (pozitieCard.left + pozitieCard.width / 2 - window.innerWidth / 2) + 'px',
         '--deplasare-y': (pozitieCard.top + pozitieCard.height / 2 - window.innerHeight / 2) + 'px'
     } : {};
+
+    function laInchidereaFerestrei()
+    {
+        setTimeout(laInchidere, DURATA_ANIMATIE);
+    }
 
     useEffect(() =>
     {
@@ -59,7 +67,7 @@ export default function PopupReteta({idReteta, pozitieCard, laInchidere})
             style={stilFereastra}
             closedby="any"
             aria-labelledby="titluPopup"
-            onClose={laInchidere}
+            onClose={laInchidereaFerestrei}
         >
             <button
                 type="button"
@@ -99,6 +107,7 @@ export default function PopupReteta({idReteta, pozitieCard, laInchidere})
                                     <li key={pas.numar}>{pas.continut}</li>
                                 ))}
                             </ol>
+                            <RecenziiReteta idReteta={reteta.id} />
                         </>
                     )}
                 </div>

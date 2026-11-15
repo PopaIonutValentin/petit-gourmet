@@ -217,16 +217,28 @@ h3
     background-color: var(--culoare-card);
     color: var(--culoare-text);
     box-shadow: 0 16px 48px rgba(41, 31, 29, 0.25);
+    opacity: 0;
+    transform: translate(var(--deplasare-x, 0px), var(--deplasare-y, 0px)) scale(0.2);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out, overlay 0.3s allow-discrete, display 0.3s allow-discrete;
+}
+
+.popup[open]
+{
     opacity: 1;
     transform: translate(0, 0) scale(1);
-    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 }
 
 .popup::backdrop
 {
+    background-color: rgba(41, 31, 29, 0);
+    backdrop-filter: blur(0);
+    transition: background-color 0.3s ease-out, backdrop-filter 0.3s ease-out, overlay 0.3s allow-discrete, display 0.3s allow-discrete;
+}
+
+.popup[open]::backdrop
+{
     background-color: rgba(41, 31, 29, 0.35);
     backdrop-filter: blur(6px);
-    transition: background-color 0.25s ease-out, backdrop-filter 0.25s ease-out;
 }
 
 @starting-style
@@ -340,6 +352,60 @@ h3
     outline: 3px solid var(--culoare-accent);
     outline-offset: -3px;
     border-radius: 16px;
+}
+
+.recenzii
+{
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--culoare-fundal);
+}
+
+.recenzii-lista
+{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.recenzie
+{
+    padding: 12px 16px;
+    border-radius: 12px;
+    background-color: var(--culoare-fundal);
+}
+
+.recenzie-antet
+{
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+    
+.recenzie-autor
+{
+    font-weight: 600;
+}
+
+.recenzie-stele
+{
+    color: var(--culoare-buton);
+    letter-spacing: 2px;
+}
+
+.recenzie-stele
+{
+    color: var(--culoare-buton);
+    letter-spacing: 2px;
+}
+
+.recenzie-text
+{
+    margin: 0;
 }
 
 @media (max-width: 768px)
