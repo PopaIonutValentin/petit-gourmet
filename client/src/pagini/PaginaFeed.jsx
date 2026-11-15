@@ -3,7 +3,7 @@ import {cerereApi} from '../api.js';
 import CardReteta from '../componente/CardReteta.jsx';
 import PopupReteta from '../componente/PopupReteta.jsx';
 
-export default function PaginaFeed()
+export default function PaginaFeed({utilizator})
 {
     const [retete, seteazaRetete] = useState([]);
     const [seIncarca, seteazaSeIncarca] = useState(true);
@@ -63,6 +63,7 @@ export default function PaginaFeed()
                 <PopupReteta
                     idReteta={idRetetaDeschisa}
                     pozitieCard={pozitieCard}
+                    utilizator={utilizator}
                     laInchidere={() => seteazaIdRetetaDeschisa(null)}
                 />
             )}

@@ -93,7 +93,7 @@ export default function App()
             <main className="continut">
                 <p role="alert">{eroareDeconectare}</p>
                 <Routes>
-                    <Route path="/" element={<PaginaFeed />} />
+                    <Route path="/" element={<PaginaFeed utilizator={utilizator} />} />
                     <Route path="/autentificare" element={<PaginaAutentificare laAutentificare={seteazaUtilizator} />} />
                     <Route path="/inregistrare" element={<PaginaInregistrare />} />
                     <Route path="*" element={<PaginaNegasita />} />
