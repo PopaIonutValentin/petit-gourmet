@@ -5,7 +5,7 @@ import RecenziiReteta from './RecenziiReteta.jsx';
 
 const DURATA_ANIMATIE = 300;
 
-export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchidere})
+export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchidere, laIncarcareRecenzii})
 {
     const [reteta, seteazaReteta] = useState(null);
     const [eroare, seteazaEroare] = useState('');
@@ -112,6 +112,7 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
                                 idAutor={reteta.autor_id}
                                 estePrivata={reteta.vizibilitate === 'private'}
                                 utilizator={utilizator}
+                                laIncarcareRecenzii={laIncarcareRecenzii}
                             />
                         </>
                     )}

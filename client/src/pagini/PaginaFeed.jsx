@@ -17,6 +17,17 @@ export default function PaginaFeed({utilizator})
         seteazaIdRetetaDeschisa(idReteta);
     }
 
+    function actualizeazaStelele(idReteta, recenziiReteta)
+    {
+        const numar = recenziiReteta.length;
+        const suma = recenziiReteta.reduce((total, recenzie) => total + recenzie.nota, 0);
+        const medie = numar > 0 ? Math.round(suma / numar * 10) / 10 :null;
+
+        seteazaRetete((reteteVechi) => reteteVechi.map((reteta) =>
+            reteta.id === idReteta ? {...reteta, numar_recenzii: numar, medie_stele: medie} : reteta
+        ));
+    }
+
     useEffect(() =>
     {
         let ignora = false;
@@ -65,6 +76,7 @@ export default function PaginaFeed({utilizator})
                     pozitieCard={pozitieCard}
                     utilizator={utilizator}
                     laInchidere={() => seteazaIdRetetaDeschisa(null)}
+                    laIncarcareRecenzii={actualizeazaStelele}
                 />
             )}
             <p role="alert">{eroare}</p>

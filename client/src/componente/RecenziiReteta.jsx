@@ -3,7 +3,7 @@ import {cerereApi} from '../api.js';
 import {Link} from 'react-router';
 import {CircleAlert, CircleCheck, Info, LogIn} from 'lucide-react';
 
-export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizator})
+export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizator, laIncarcareRecenzii})
 {
     const [recenzii, seteazaRecenzii] = useState([]);
     const [seIncarca, seteazaSeIncarca] = useState(true);
@@ -27,6 +27,7 @@ export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizat
                 if(!ignora)
                 {
                     seteazaRecenzii(raspuns.recenzii);
+                    laIncarcareRecenzii(idReteta, raspuns.recenzii);
                 }
             }
             catch (eroareCerere)
