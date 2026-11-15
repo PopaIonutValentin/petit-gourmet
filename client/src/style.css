@@ -679,6 +679,13 @@ h3
     outline: none;
 }
 
+.cautare-formular input::placeholder,
+.cautare-camp input::placeholder
+{
+    color: var(--culoare-text-secundar);
+    opacity: 1;
+}
+
 .cautare-categorie
 {
     flex-shrink: 0;

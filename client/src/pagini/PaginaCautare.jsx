@@ -106,6 +106,7 @@ export default function PaginaCautare({utilizator, laModificare})
                     <input
                         type="search"
                         aria-label="Cauta dupa nume, autor sau ingredient"
+                        placeholder="Nume, autor sau ingredient"
                         maxLength={100}
                         value={textCamp}
                         onChange={(eveniment) => seteazaTextCamp(eveniment.target.value)}
@@ -117,7 +118,7 @@ export default function PaginaCautare({utilizator, laModificare})
                 <button
                     type="button"
                     aria-haspopup="dialog"
-                    onClick={(eveniment) => laModificare(eveniment.currentTarget.getBoundingClientRect())}
+                    onClick={(eveniment) => laModificare(eveniment.currentTarget.getBoundingClientRect(), true)}
                 >
                     <SlidersHorizontal aria-hidden="true" />
                     Modifica

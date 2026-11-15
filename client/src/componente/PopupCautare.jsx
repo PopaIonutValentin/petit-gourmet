@@ -5,7 +5,7 @@ import {cerereApi} from '../api.js';
 
 const DURATA_ANIMATIE = 300;
 
-export default function PopupCautare({pozitieButon, laInchidere})
+export default function PopupCautare({pozitieButon, doarCategorii, laInchidere})
 {
     const [parametriAdresa] = useSearchParams();
     const [textCautat, seteazaTextCautat] = useState(parametriAdresa.get('cauta') ?? '');
@@ -30,7 +30,7 @@ export default function PopupCautare({pozitieButon, laInchidere})
         if(!fereastra.current.open)
         {
             fereastra.current.showModal();
-            campCautare.current.focus();
+            campCautare.current?.focus();
         }
     }, []);
 
@@ -106,16 +106,18 @@ export default function PopupCautare({pozitieButon, laInchidere})
             </button>
             <div className="popup-continut">
                 <form className="popup-text cautare-formular" onSubmit={cauta}>
-                    <h2 id="titluCautare">Cauta o reteta</h2>
-                    <label htmlFor="textCautat">Nume, autor sau ingredient</label>
-                    <input
-                        ref={campCautare}
-                        id="textCautat"
-                        type="search"
-                        maxLength={100}
-                        value={textCautat}
-                        onChange={(eveniment) => seteazaTextCautat(eveniment.target.value)}
-                    />
+                    <h2 id="titluCautare">{doarCategorii ? 'Alege categoria' : 'Cauta o reteta'}</h2>
+                    {!doarCategorii && (
+                        <input
+                            ref={campCautare}
+                            type="search"
+                            aria-label="Nume, autor sau ingredient"
+                            placeholder="Nume, autor sau ingredient"
+                            maxLength={100}
+                            value={textCautat}
+                            onChange={(eveniment) => seteazaTextCautat(eveniment.target.value)}
+                        />
+                    )}
                     <p id="etichetaCategorii" className="cautare-eticheta">Categorie</p>
                     <div className="cautare-categorii" role="group" aria-labelledby="etichetaCategorii">
                         <button
@@ -141,7 +143,7 @@ export default function PopupCautare({pozitieButon, laInchidere})
                     {eroare && <p role="alert" className="recenzie-mesaj recenzie-mesaj-eroare">{eroare}</p>}
                     <button type="submit">
                         <Search aria-hidden="true" />
-                        Cauta
+                        {doarCategorii ? 'Aplica' : 'Cauta'}
                     </button>
                 </form>
             </div>

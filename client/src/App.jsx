@@ -21,6 +21,7 @@ export default function App()
     const[eroareDeconectare, seteazaEroareDeconectare] = useState('');
     const [cautareDeschisa, seteazaCautareDeschisa] = useState(false);
     const [pozitieCautare, seteazaPozitieCautare] = useState(null);
+    const [popupDoarCategorii, seteazaPopupDoarCategorii] = useState(false);
     const navigheaza = useNavigate();
 
     useEffect(() =>
@@ -78,9 +79,10 @@ export default function App()
         }
     }
 
-    function deschideCautarea(dreptunghiButon)
+    function deschideCautarea(dreptunghiButon, doarCategorii = false)
     {
         seteazaPozitieCautare(dreptunghiButon);
+        seteazaPopupDoarCategorii(doarCategorii);
         seteazaCautareDeschisa(true);
     }
 
@@ -104,6 +106,7 @@ export default function App()
             {cautareDeschisa && (
                 <PopupCautare
                     pozitieButon={pozitieCautare}
+                    doarCategorii={popupDoarCategorii}
                     laInchidere={() => seteazaCautareDeschisa(false)}
                 />
             )}
