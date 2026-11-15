@@ -721,6 +721,55 @@ h3
     }
 }
 
+.cautare-gol
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 48px 16px;
+    text-align: center;
+}
+
+.cautare-gol-iconita
+{
+    width: 64px;
+    height: 64px;
+    color: var(--culoare-accent);
+}
+
+.cautare-gol h2
+{
+    margin: 0;
+}
+
+.cautare-gol p
+{
+    margin: 0;
+    color: var(--culoare-text-secundar);
+}
+
+.cautare-gol button
+{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    background-color: var(--culoare-buton);
+    color: var(--culoare-text-buton);
+    font: inherit;
+    cursor: pointer;
+}
+
+.cautare-gol button:focus-visible
+{
+    outline: 3px solid var(--culoare-accent);
+    outline-offset: 2px;
+}
+
 @media (max-width: 768px)
 {
     .meniu

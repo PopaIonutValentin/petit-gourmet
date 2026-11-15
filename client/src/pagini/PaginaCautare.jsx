@@ -1,6 +1,6 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {useSearchParams} from 'react-router';
-import {Search, SlidersHorizontal} from 'lucide-react';
+import {RotateCcw, Search, SearchX, SlidersHorizontal} from 'lucide-react';
 import {cerereApi} from '../api.js';
 import ListaRetete from '../componente/ListaRetete.jsx';
 
@@ -16,6 +16,7 @@ export default function PaginaCautare({utilizator, laModificare})
     const idCategorie = parametriAdresa.get('categorie');
     const filtre = parametriAdresa.toString();
     const categorieAleasa = categorii.find((categorie) => String(categorie.id) === idCategorie);
+    const campCautare = useRef(null);
     
         function aplicaTextul(text)
     {
@@ -42,6 +43,12 @@ export default function PaginaCautare({utilizator, laModificare})
     {
         eveniment.preventDefault();
         aplicaTextul(textCamp);
+    }
+
+    function reseteazaFiltrele()
+    {
+        seteazaParametriAdresa(new URLSearchParams());
+        campCautare.current.focus();
     }
 
     useEffect(() =>
@@ -104,6 +111,7 @@ export default function PaginaCautare({utilizator, laModificare})
                 <form role="search" className="cautare-camp" onSubmit={trimiteCautarea}>
                     <Search aria-hidden="true" />
                     <input
+                        ref={campCautare}
                         type="search"
                         aria-label="Cauta dupa nume, autor sau ingredient"
                         placeholder="Nume, autor sau ingredient"
@@ -128,7 +136,17 @@ export default function PaginaCautare({utilizator, laModificare})
                 key={filtre}
                 filtre={filtre}
                 utilizator={utilizator}
-                mesajGol={<p>Nicio reteta gasita.</p>}
+                mesajGol={
+                    <div className="cautare-gol">
+                        <SearchX aria-hidden="true" className="cautare-gol-iconita" />
+                        <h2>Nicio reteta gasita</h2>
+                        <p>Incearca alt cuvant sau alege alta categorie.</p>
+                        <button type="button" onClick={reseteazaFiltrele}>
+                            <RotateCcw aria-hidden="true" />
+                            Reseteaza filtrele
+                        </button>
+                    </div>
+                }
             />
         </>
     );
