@@ -1,4 +1,5 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
+import {CircleCheck, LoaderCircle} from 'lucide-react';
 import {cerereApi} from '../api.js';
 import CardReteta from '../componente/CardReteta.jsx';
 import PopupReteta from '../componente/PopupReteta.jsx';
@@ -10,6 +11,9 @@ export default function PaginaFeed({utilizator})
     const [eroare, seteazaEroare] = useState('');
     const [idRetetaDeschisa, seteazaIdRetetaDeschisa] = useState(null);
     const [pozitieCard, seteazaPozitieCard] = useState(null);
+    const [cursor, seteazaCursor] = useState(null);
+    const [seIncarcaMaiMulte, seteazaSeIncarcaMaiMulte] = useState(false);
+    const capatulListei = useRef(null);
 
     function deschideReteta(idReteta, dreptunghiCard)
     {
@@ -28,6 +32,27 @@ export default function PaginaFeed({utilizator})
         ));
     }
 
+    async function incarcaMaiMulte() 
+    {
+        seteazaSeIncarcaMaiMulte(true);
+
+        try
+        {
+            const raspuns = await cerereApi('GET', '/retete?dupa=' + cursor);
+
+            seteazaRetete((reteteVechi) => [...reteteVechi, ...raspuns.retete]);
+            seteazaCursor(raspuns.urmatorulCursor);
+        }
+        catch (eroareCerere)
+        {
+            seteazaEroare(eroareCerere.message);
+        }
+        finally
+        {
+            seteazaSeIncarcaMaiMulte(false);
+        }
+    }
+
     useEffect(() =>
     {
         let ignora = false;
@@ -41,6 +66,7 @@ export default function PaginaFeed({utilizator})
                 if(!ignora)
                 {
                     seteazaRetete(raspuns.retete);
+                    seteazaCursor(raspuns.urmatorulCursor);
                 }
             }
             catch (eroareCerere)
@@ -67,6 +93,29 @@ export default function PaginaFeed({utilizator})
         };
     }, []);
 
+    useEffect(() =>
+    {
+        if(cursor === null || eroare || seIncarcaMaiMulte)
+        {
+            return;
+        }
+
+        const observator = new IntersectionObserver((intrari) =>
+        {
+            if(intrari[0].isIntersecting)
+            {
+                incarcaMaiMulte();
+            }
+        }, {rootMargin: '400px'});
+
+        observator.observe(capatulListei.current);
+
+        return () =>
+        {
+            observator.disconnect();
+        };
+    }, [cursor, eroare, seIncarcaMaiMulte]);
+
     return (
         <>
             <h1>Feed</h1>
@@ -80,7 +129,14 @@ export default function PaginaFeed({utilizator})
                 />
             )}
             <p role="alert">{eroare}</p>
-            {seIncarca && <p>Se incarca retetele...</p>}
+            {seIncarca && (
+                <div className="feed-incarcare">
+                    <p className="recenzie-mesaj">
+                        <LoaderCircle aria-hidden="true" className="feed-rotita" />
+                        Se incarca retetele...
+                    </p>
+                </div>
+            )}
             {!seIncarca && !eroare && retete.length === 0 && <p>Nu exista inca retete publice.</p>}
             <ul className="feed-grila">
                 {retete.map((reteta) => (
@@ -89,6 +145,24 @@ export default function PaginaFeed({utilizator})
                     </li>
                 ))}
             </ul>
+            {cursor !== null && !eroare && (
+                <div ref={capatulListei} className="feed-final">
+                    {seIncarcaMaiMulte && (
+                        <p className="recenzie-mesaj">
+                            <LoaderCircle aria-hidden="true" className="feed-rotita" />
+                            Se incarca retetele...
+                        </p>
+                    )}
+                </div>
+            )}
+            {!seIncarca && !eroare && cursor === null && retete.length > 0 && (
+                <div className="feed-final">
+                    <p className="recenzie-mesaj">
+                        <CircleCheck aria-hidden="true" />
+                        Ai vazut toate retetele.
+                    </p>
+                </div>
+            )}
         </>
     );
 }

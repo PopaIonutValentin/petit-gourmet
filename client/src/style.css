@@ -506,6 +506,42 @@ h3
     color: var(--culoare-eroare);
 }
 
+.feed-final
+{
+    display: flex;
+    justify-content: center;
+    padding: 32px 0;
+}
+
+.feed-rotita
+{
+    animation: rotire 1s linear infinite;
+}
+
+@keyframes rotire
+{
+    to
+    {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce)
+{
+    .feed-rotita
+    {
+        animation: none;
+    }
+}
+
+.feed-incarcare
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+}
+
 @media (max-width: 768px)
 {
     .meniu
