@@ -2,7 +2,7 @@ import {NavLink, useLocation} from 'react-router';
 import {House, Search, SquarePlus, User, ShieldCheck, LogIn, UserPlus, LogOut} from 'lucide-react';
 import logo from '../imagini/logo-petit-gourmet.webp';
 
-export default function Meniu({utilizator, seVerifica, laDeconectare, laCautare})
+export default function Meniu({utilizator, seVerifica, laDeconectare, laCautare, laAdaugare})
 {
     const locatie = useLocation();
 
@@ -30,10 +30,16 @@ export default function Meniu({utilizator, seVerifica, laDeconectare, laCautare}
             </button> 
             {!seVerifica && utilizator &&(
                 <>
-                    <NavLink to="/retete/noua" className="meniu-legatura">
+                    <button
+                        type="button"
+                        className="meniu-legatura"
+                        aria-haspopup="dialog"
+                        onClick={(eveniment) => laAdaugare(eveniment.currentTarget.getBoundingClientRect())}
+                    >
                         <SquarePlus />
                         <span>Adauga reteta</span>
-                    </NavLink>
+                    </button>
+
                     <NavLink to="/profil" className="meniu-legatura">
                         <User />
                         <span>Profilul meu</span>

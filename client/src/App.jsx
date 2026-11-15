@@ -8,6 +8,7 @@ import Meniu from './componente/Meniu.jsx';
 import logo from './imagini/logo-petit-gourmet.webp';
 import PaginaCautare from './pagini/PaginaCautare.jsx';
 import PopupCautare from './componente/PopupCautare.jsx';
+import PopupAdaugaReteta from './componente/PopupAdaugaReteta.jsx';
 
 function PaginaNegasita()
 {
@@ -16,12 +17,14 @@ function PaginaNegasita()
 
 export default function App()
 {
-    const[utilizator, seteazaUtilizator] = useState(null);
-    const[seVerifica, seteazaSeVerifica] = useState(true);
-    const[eroareDeconectare, seteazaEroareDeconectare] = useState('');
+    const [utilizator, seteazaUtilizator] = useState(null);
+    const [seVerifica, seteazaSeVerifica] = useState(true);
+    const [eroareDeconectare, seteazaEroareDeconectare] = useState('');
     const [cautareDeschisa, seteazaCautareDeschisa] = useState(false);
     const [pozitieCautare, seteazaPozitieCautare] = useState(null);
     const [popupDoarCategorii, seteazaPopupDoarCategorii] = useState(false);
+    const [adaugareDeschisa, seteazaAdaugareDeschisa] = useState(false);
+    const [pozitieAdaugare, seteazaPozitieAdaugare] = useState(null);
     const navigheaza = useNavigate();
 
     useEffect(() =>
@@ -86,6 +89,12 @@ export default function App()
         seteazaCautareDeschisa(true);
     }
 
+    function deschideAdaugarea(dreptunghiButon)
+    {
+        seteazaPozitieAdaugare(dreptunghiButon);
+        seteazaAdaugareDeschisa(true);
+    }
+
     return (
         <div className="aplicatie">
             <header className="antet-mobil">
@@ -102,12 +111,19 @@ export default function App()
                 seVerifica={seVerifica}
                 laDeconectare={deconecteaza}
                 laCautare={deschideCautarea}
+                laAdaugare={deschideAdaugarea}
             />
             {cautareDeschisa && (
                 <PopupCautare
                     pozitieButon={pozitieCautare}
                     doarCategorii={popupDoarCategorii}
                     laInchidere={() => seteazaCautareDeschisa(false)}
+                />
+            )}
+            {adaugareDeschisa && (
+                <PopupAdaugaReteta
+                    pozitieButon={pozitieAdaugare}
+                    laInchidere={() => seteazaAdaugareDeschisa(false)}
                 />
             )}
             <main className="continut">

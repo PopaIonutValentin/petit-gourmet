@@ -770,6 +770,255 @@ h3
     outline-offset: 2px;
 }
 
+.reteta-formular
+{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.reteta-formular h2
+{
+    margin: 0 48px 4px 0;
+}
+
+.reteta-formular label,
+.reteta-formular legend
+{
+    font-weight: 600;
+}
+
+.reteta-formular input[type="text"],
+.reteta-formular textarea,
+.reteta-formular select
+{
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--culoare-text-secundar);
+    border-radius: 8px;
+    background-color: var(--culoare-card);
+    color: var(--culoare-text);
+    font: inherit;
+}
+
+.reteta-formular textarea
+{
+    resize: vertical;
+}
+
+.reteta-formular input::placeholder,
+.reteta-formular textarea::placeholder
+{
+    color: var(--culoare-text-secundar);
+    opacity: 1;
+}
+
+.reteta-formular fieldset
+{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.reteta-formular legend
+{
+    margin-bottom: 8px;
+    padding: 0;
+}
+
+.reteta-rand input:first-child
+{
+    flex: 0 0 35%;
+}
+
+.reteta-comutator
+{
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.reteta-comutator input
+{
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.reteta-comutator-sina
+{
+    position: relative;
+    flex-shrink: 0;
+    width: 44px;
+    height: 24px;
+    border-radius: 999px;
+    background-color: var(--culoare-text-secundar);
+    transition: background-color 0.2s ease-out;
+}
+
+.reteta-comutator-sina::after
+{
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--culoare-card);
+    transition: transform 0.2s ease-out;
+}
+
+.reteta-comutator input:checked + .reteta-comutator-sina
+{
+    background-color: var(--culoare-buton);
+}
+
+.reteta-comutator input:checked + .reteta-comutator-sina::after
+{
+    transform: translateX(20px);
+}
+
+.reteta-comutator input:focus-visible + .reteta-comutator-sina
+{
+    outline: 3px solid var(--culoare-accent);
+    outline-offset: 2px;
+}
+
+.reteta-rand
+{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.reteta-rand input
+{
+    min-width: 0;
+}
+
+.reteta-pasi
+{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.reteta-pas
+{
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.reteta-pas textarea
+{
+    flex: 1;
+    min-width: 0;
+}
+
+.reteta-pas-numar
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background-color: var(--culoare-fundal);
+    color: var(--culoare-buton);
+    font-weight: 600;
+}
+
+.reteta-sterge-rand
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--culoare-text-secundar);
+    border-radius: 50%;
+    background: none;
+    color: var(--culoare-text-secundar);
+    cursor: pointer;
+}
+
+.reteta-sterge-rand:hover
+{
+    border-color: var(--culoare-eroare);
+    color: var(--culoare-eroare);
+}
+
+.reteta-adauga-rand
+{
+    display: flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px dashed var(--culoare-accent);
+    border-radius: 12px;
+    background: none;
+    color: var(--culoare-buton);
+    font: inherit;
+    cursor: pointer;
+}
+
+.reteta-adauga-rand:hover
+{
+    background-color: var(--culoare-fundal);
+}
+
+.reteta-sterge-rand:focus-visible,
+.reteta-adauga-rand:focus-visible
+{
+    outline: 3px solid var(--culoare-accent);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce)
+{
+    .reteta-comutator-sina,
+    .reteta-comutator-sina::after
+    {
+        transition: none;
+    }
+}
+
+.reteta-formular button[type="submit"]
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    background-color: var(--culoare-buton);
+    color: var(--culoare-text-buton);
+    font: inherit;
+    cursor: pointer;
+}
+
+.reteta-formular button[type="submit"]:disabled
+{
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 @media (max-width: 768px)
 {
     .meniu
