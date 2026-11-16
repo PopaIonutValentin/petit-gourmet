@@ -1,10 +1,12 @@
 import {useState, useEffect, useRef} from 'react';
-import {Minus, Plus, X} from 'lucide-react';
+import {ImagePlus, Minus, Plus, X} from 'lucide-react';
 import {cerereApi} from '../api.js';
 import PopupConfirmare from './PopupConfirmare.jsx';
 
 const DURATA_ANIMATIE = 300;
 const MAXIM_RANDURI = 50;
+const TIPURI_POZA = ['image/jpeg', 'image/png', 'image/webp'];
+const MARIME_MAXIMA_POZA = 5 * 1024 * 1024;
 
 function creeazaIngredientGol()
 {
@@ -29,9 +31,14 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
     const [seTrimite, seteazaSeTrimite] = useState(false);
     const [confirmareDeschisa, seteazaConfirmareDeschisa] = useState(false);
     const [punctConfirmare, seteazaPunctConfirmare] = useState(null);
+    const [poza, seteazaPoza] = useState(null);
+    const [adresaPrevizualizare, seteazaAdresaPrevizualizare] = useState('');
+    const [eroarePoza, seteazaEroarePoza] = useState('');
+    const [idRetetaSalvata, seteazaIdRetetaSalvata] = useState(null);
     const punctApasare = useRef(null);
     const fereastra = useRef(null);
     const campTitlu = useRef(null);
+    const campPoza = useRef(null);
     const punctButon = pozitieButon ? {
         x: pozitieButon.left + pozitieButon.width / 2,
         y: pozitieButon.top + pozitieButon.height / 2
@@ -47,7 +54,8 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
         idCategorie !== '' ||
         estePrivata ||
         ingrediente.some((ingredient) => ingredient.cantitate.trim() !== '' || ingredient.nume.trim() !== '') ||
-        pasi.some((pas) => pas.continut.trim() !== '');
+        pasi.some((pas) => pas.continut.trim() !== '') ||
+        poza !== null;
 
     function laInchidereaFerestrei()
     {
@@ -56,7 +64,7 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
 
     function laCerereDeInchidere(eveniment)
     {
-        if(areModificari)
+        if(areModificari && idRetetaSalvata === null)
         {
             eveniment.preventDefault();
             seteazaPunctConfirmare(punctApasare.current);
@@ -132,6 +140,39 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
         seteazaPasi((pasiVechi) => pasiVechi.filter((pas) => pas.cheie !== cheie));
     }
 
+    function alegePoza(eveniment)
+    {
+        const fisier = eveniment.target.files[0];
+
+        eveniment.target.value = '';
+
+        if(fisier === undefined)
+        {
+            return;
+        }
+
+        if(!TIPURI_POZA.includes(fisier.type))
+        {
+            seteazaEroarePoza('Poza trebuie sa fie JPEG, PNG sau WebP.');
+            return;
+        }
+
+        if(fisier.size > MARIME_MAXIMA_POZA)
+        {
+            seteazaEroarePoza('Poza poate avea cel mult 5 MB.');
+            return;
+        }
+
+        seteazaEroarePoza('');
+        seteazaPoza(fisier);
+    }
+
+    function scoatePoza()
+    {
+        seteazaPoza(null);
+        campPoza.current.focus();
+    }
+
     useEffect(() =>
     {
         if(!fereastra.current.open)
@@ -145,7 +186,7 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
     {
         let ignora = false;
 
-        async function citesteCategoriile() 
+        async function citesteCategoriile()
         {
             try
             {
@@ -162,7 +203,7 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
                 {
                     seteazaEroare(eroareCerere.message);
                 }
-            } 
+            }
         }
 
         citesteCategoriile();
@@ -173,29 +214,70 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
         };
     }, []);
 
-    async function trimiteReteta(eveniment) 
+    useEffect(() =>
+    {
+        if(poza === null)
+        {
+            seteazaAdresaPrevizualizare('');
+            return;
+        }
+
+        const adresa = URL.createObjectURL(poza);
+
+        seteazaAdresaPrevizualizare(adresa);
+
+        return () =>
+        {
+            URL.revokeObjectURL(adresa);
+        };
+    }, [poza]);
+
+    async function trimiteReteta(eveniment)
     {
         eveniment.preventDefault();
         seteazaEroare('');
         seteazaSeTrimite(true);
-        
+
+        let idReteta = idRetetaSalvata;
+
         try
         {
-            await cerereApi('POST', '/retete',
+            if(idReteta === null)
             {
-                titlu: titlu,
-                descriere: descriere,
-                vizibilitate: estePrivata? 'private' : 'public',
-                categorie_id: idCategorie === '' ? null : Number(idCategorie),
-                ingrediente: ingrediente.map((ingredient) => ({nume: ingredient.nume, cantitate: ingredient.cantitate})),
-                pasi: pasi.map((pas) => pas.continut)
-            });
+                const raspuns = await cerereApi('POST', '/retete',
+                {
+                    titlu: titlu,
+                    descriere: descriere,
+                    vizibilitate: estePrivata ? 'private' : 'public',
+                    categorie_id: idCategorie === '' ? null : Number(idCategorie),
+                    ingrediente: ingrediente.map((ingredient) => ({nume: ingredient.nume, cantitate: ingredient.cantitate})),
+                    pasi: pasi.map((pas) => pas.continut)
+                });
+
+                idReteta = raspuns.id;
+                seteazaIdRetetaSalvata(idReteta);
+            }
+
+            if(poza !== null)
+            {
+                const datePoza = new FormData();
+
+                datePoza.append('poza', poza);
+                await cerereApi('POST', '/retete/' + idReteta + '/poza', datePoza);
+            }
 
             fereastra.current.close();
         }
         catch (eroareCerere)
         {
-            seteazaEroare(eroareCerere.message);
+            if(idReteta === null)
+            {
+                seteazaEroare(eroareCerere.message);
+            }
+            else
+            {
+                seteazaEroare('Reteta a fost salvata, dar poza nu: ' + eroareCerere.message);
+            }
         }
         finally
         {
@@ -205,161 +287,187 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
 
     return (
         <>
-        <dialog
-            ref={fereastra}
-            className="popup"
-            style={stilFereastra}
-            closedby="any"
-            aria-labelledby="titluAdaugare"
-            onCancel={laCerereDeInchidere}
-            onClose={laInchidereaFerestrei}
-            onPointerDown={retinePunctulApasarii}
-            onKeyDown={uitaPunctulLaEsc}
-        >
-            <button
-                type="button"
-                className="popup-inchidere"
-                aria-label="Inchide"
-                onClick={inchidereDinButon}
+            <dialog
+                ref={fereastra}
+                className="popup"
+                style={stilFereastra}
+                closedby="any"
+                aria-labelledby="titluAdaugare"
+                onCancel={laCerereDeInchidere}
+                onClose={laInchidereaFerestrei}
+                onPointerDown={retinePunctulApasarii}
+                onKeyDown={uitaPunctulLaEsc}
             >
-                <X aria-hidden="true" />
-            </button>
-            <div className="popup-continut">
-                <form className="popup-text reteta-formular" onSubmit={trimiteReteta} noValidate>
-                    <h2 id="titluAdaugare">Adauga o reteta</h2>
-                    <label htmlFor="titluReteta">Titlu</label>
-                    <input
-                        ref={campTitlu}
-                        id="titluReteta"
-                        type="text"
-                        maxLength={100}
-                        value={titlu}
-                        onChange={(eveniment) => seteazaTitlu(eveniment.target.value)}
-                    />
-                    <label htmlFor="descriereReteta">Descriere</label>
-                    <textarea
-                        id="descriereReteta"
-                        rows={3}
-                        maxLength={2000}
-                        value={descriere}
-                        onChange={(eveniment) => seteazaDescriere(eveniment.target.value)}
-                    />
-                    <label htmlFor="categorieReteta">Categorie</label>
-                    <select
-                        id="categorieReteta"
-                        value={idCategorie}
-                        onChange={(eveniment) => seteazaIdCategorie(eveniment.target.value)}
-                    >
-                        <option value="">Fara categorie</option>
-                        {categorii.map((categorie) => (
-                            <option key={categorie.id} value={categorie.id}>{categorie.nume}</option>
-                        ))}
-                    </select>
-                    <label className="reteta-comutator">
+                <button
+                    type="button"
+                    className="popup-inchidere"
+                    aria-label="Inchide"
+                    onClick={inchidereDinButon}
+                >
+                    <X aria-hidden="true" />
+                </button>
+                <div className="popup-continut">
+                    <form className="popup-text reteta-formular" onSubmit={trimiteReteta} noValidate>
+                        <h2 id="titluAdaugare">Adauga o reteta</h2>
+                        <label htmlFor="titluReteta">Titlu</label>
                         <input
-                            type="checkbox"
-                            role="switch"
-                            checked={estePrivata}
-                            onChange={(eveniment) => seteazaEstePrivata(eveniment.target.checked)}
+                            ref={campTitlu}
+                            id="titluReteta"
+                            type="text"
+                            maxLength={100}
+                            value={titlu}
+                            onChange={(eveniment) => seteazaTitlu(eveniment.target.value)}
                         />
-                        <span className="reteta-comutator-sina" aria-hidden="true"></span>
-                        Privata (doar eu o vad)
-                    </label>
-                    <fieldset>
-                        <legend>Ingrediente</legend>
-                        {ingrediente.map((ingredient, pozitie) => (
-                            <div key={ingredient.cheie} className="reteta-rand">
-                                <input
-                                    type="text"
-                                    aria-label={'Cantitate, ingredientul ' + (pozitie + 1)}
-                                    placeholder="Cantitate (ex. 200 g)"
-                                    maxLength={50}
-                                    autoFocus
-                                    value={ingredient.cantitate}
-                                    onChange={(eveniment) => modificaIngredientul(ingredient.cheie, 'cantitate', eveniment.target.value)}
-                                />
-                                <input
-                                    type="text"
-                                    aria-label={'Nume, ingredientul ' + (pozitie + 1)}
-                                    placeholder="Ingredient (ex. faina)"
-                                    maxLength={100}
-                                    value={ingredient.nume}
-                                    onChange={(eveniment) => modificaIngredientul(ingredient.cheie, 'nume', eveniment.target.value)}
-                                />
-                                {ingrediente.length > 1 && (
+                        <label htmlFor="descriereReteta">Descriere</label>
+                        <textarea
+                            id="descriereReteta"
+                            rows={3}
+                            maxLength={2000}
+                            value={descriere}
+                            onChange={(eveniment) => seteazaDescriere(eveniment.target.value)}
+                        />
+                        <label htmlFor="categorieReteta">Categorie</label>
+                        <select
+                            id="categorieReteta"
+                            value={idCategorie}
+                            onChange={(eveniment) => seteazaIdCategorie(eveniment.target.value)}
+                        >
+                            <option value="">Fara categorie</option>
+                            {categorii.map((categorie) => (
+                                <option key={categorie.id} value={categorie.id}>{categorie.nume}</option>
+                            ))}
+                        </select>
+                        <label className="reteta-comutator">
+                            <input
+                                type="checkbox"
+                                role="switch"
+                                checked={estePrivata}
+                                onChange={(eveniment) => seteazaEstePrivata(eveniment.target.checked)}
+                            />
+                            <span className="reteta-comutator-sina" aria-hidden="true"></span>
+                            Privata (doar eu o vad)
+                        </label>
+                        <div className="reteta-poza">
+                            {poza !== null && adresaPrevizualizare !== '' && (
+                                <div className="reteta-poza-previzualizare">
+                                    <img src={adresaPrevizualizare} alt="Previzualizarea pozei alese" />
                                     <button
                                         type="button"
-                                        className="reteta-sterge-rand"
-                                        aria-label={'Sterge ingredientul ' + (pozitie + 1)}
-                                        onClick={() => stergeIngredientul(ingredient.cheie)}
+                                        className="reteta-poza-scoate"
+                                        aria-label="Scoate poza"
+                                        onClick={scoatePoza}
                                     >
-                                        <Minus aria-hidden="true" />
+                                        <X aria-hidden="true" />
                                     </button>
-                                )} 
-                            </div>
-                        ))}
-                        {ingrediente.length < MAXIM_RANDURI && (
-                            <button type="button" className="reteta-adauga-rand" onClick={adaugaIngredient}>
-                                <Plus aria-hidden="true" />
-                                Adauga ingredient
-                            </button>
-                        )}
-                    </fieldset>
-                    <fieldset>
-                        <legend>Pasi</legend>
-                        <ol className="reteta-pasi">
-                            {pasi.map((pas, pozitie) => (
-                                <li key={pas.cheie} className="reteta-pas">
-                                    <span className="reteta-pas-numar" aria-hidden="true">{pozitie + 1}</span>
-                                    <textarea
-                                        aria-label={'Pasul ' + (pozitie + 1)}
-                                        placeholder="Descrie pasul..."
-                                        rows={2}
-                                        maxLength={1000}
+                                </div>
+                            )}
+                            <label className="reteta-poza-zona">
+                                <input
+                                    ref={campPoza}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    onChange={alegePoza}
+                                />
+                                <ImagePlus aria-hidden="true" />
+                                {poza === null ? 'Alege o poza (optional)' : 'Schimba poza'}
+                            </label>
+                            {eroarePoza && <p role="alert" className="recenzie-mesaj recenzie-mesaj-eroare">{eroarePoza}</p>}
+                        </div>
+                        <fieldset>
+                            <legend>Ingrediente</legend>
+                            {ingrediente.map((ingredient, pozitie) => (
+                                <div key={ingredient.cheie} className="reteta-rand">
+                                    <input
+                                        type="text"
+                                        aria-label={'Cantitate, ingredientul ' + (pozitie + 1)}
+                                        placeholder="Cantitate (ex. 200 g)"
+                                        maxLength={50}
                                         autoFocus
-                                        value={pas.continut}
-                                        onChange={(eveniment) => modificaPasul(pas.cheie, eveniment.target.value)}
+                                        value={ingredient.cantitate}
+                                        onChange={(eveniment) => modificaIngredientul(ingredient.cheie, 'cantitate', eveniment.target.value)}
                                     />
-                                    {pasi.length > 1 && (
+                                    <input
+                                        type="text"
+                                        aria-label={'Nume, ingredientul ' + (pozitie + 1)}
+                                        placeholder="Ingredient (ex. faina)"
+                                        maxLength={100}
+                                        value={ingredient.nume}
+                                        onChange={(eveniment) => modificaIngredientul(ingredient.cheie, 'nume', eveniment.target.value)}
+                                    />
+                                    {ingrediente.length > 1 && (
                                         <button
                                             type="button"
                                             className="reteta-sterge-rand"
-                                            aria-label={'Sterge pasul ' + (pozitie + 1)}
-                                            onClick={() => stergePasul(pas.cheie)}
+                                            aria-label={'Sterge ingredientul ' + (pozitie + 1)}
+                                            onClick={() => stergeIngredientul(ingredient.cheie)}
                                         >
                                             <Minus aria-hidden="true" />
                                         </button>
                                     )}
-                                </li>
+                                </div>
                             ))}
-                        </ol>
-                        {pasi.length < MAXIM_RANDURI && (
-                            <button type="button" className="reteta-adauga-rand" onClick={adaugaPas}>
-                                <Plus aria-hidden="true" />
-                                Adauga pas
-                            </button>
-                        )}
-                    </fieldset>
-                    {eroare && <p role="alert" className="recenzie-mesaj recenzie-mesaj-eroare">{eroare}</p>}
-                    <button type="submit" disabled={seTrimite}>
-                        <Plus aria-hidden="true" />
-                        {seTrimite ? 'Se salveaza...' : 'Adauga reteta'}
-                    </button>
-                </form>
-            </div>    
-        </dialog>
-        {confirmareDeschisa && (
-            <PopupConfirmare
-                titlu="Renunti la reteta?"
-                mesaj="Ce ai completat pana acum se va pierde."
-                textAnulare="Continua editarea"
-                textConfirmare="Renunta"
-                punctPornire={punctConfirmare}
-                punctIesire={punctButon}
-                laConfirmare={renuntaLaReteta}
-                laInchidere={() => seteazaConfirmareDeschisa(false)}
-            />
-        )}
-    </>
+                            {ingrediente.length < MAXIM_RANDURI && (
+                                <button type="button" className="reteta-adauga-rand" onClick={adaugaIngredient}>
+                                    <Plus aria-hidden="true" />
+                                    Adauga ingredient
+                                </button>
+                            )}
+                        </fieldset>
+                        <fieldset>
+                            <legend>Pasi</legend>
+                            <ol className="reteta-pasi">
+                                {pasi.map((pas, pozitie) => (
+                                    <li key={pas.cheie} className="reteta-pas">
+                                        <span className="reteta-pas-numar" aria-hidden="true">{pozitie + 1}</span>
+                                        <textarea
+                                            aria-label={'Pasul ' + (pozitie + 1)}
+                                            placeholder="Descrie pasul..."
+                                            rows={2}
+                                            maxLength={1000}
+                                            autoFocus
+                                            value={pas.continut}
+                                            onChange={(eveniment) => modificaPasul(pas.cheie, eveniment.target.value)}
+                                        />
+                                        {pasi.length > 1 && (
+                                            <button
+                                                type="button"
+                                                className="reteta-sterge-rand"
+                                                aria-label={'Sterge pasul ' + (pozitie + 1)}
+                                                onClick={() => stergePasul(pas.cheie)}
+                                            >
+                                                <Minus aria-hidden="true" />
+                                            </button>
+                                        )}
+                                    </li>
+                                ))}
+                            </ol>
+                            {pasi.length < MAXIM_RANDURI && (
+                                <button type="button" className="reteta-adauga-rand" onClick={adaugaPas}>
+                                    <Plus aria-hidden="true" />
+                                    Adauga pas
+                                </button>
+                            )}
+                        </fieldset>
+                        {eroare && <p role="alert" className="recenzie-mesaj recenzie-mesaj-eroare">{eroare}</p>}
+                        <button type="submit" disabled={seTrimite}>
+                            <Plus aria-hidden="true" />
+                            {seTrimite ? 'Se salveaza...' : (idRetetaSalvata === null ? 'Adauga reteta' : 'Salveaza poza')}
+                        </button>
+                    </form>
+                </div>
+            </dialog>
+            {confirmareDeschisa && (
+                <PopupConfirmare
+                    titlu="Renunti la reteta?"
+                    mesaj="Ce ai completat pana acum se va pierde."
+                    textAnulare="Continua editarea"
+                    textConfirmare="Renunta"
+                    punctPornire={punctConfirmare}
+                    punctIesire={punctButon}
+                    laConfirmare={renuntaLaReteta}
+                    laInchidere={() => seteazaConfirmareDeschisa(false)}
+                />
+            )}
+        </>
     );
 }
