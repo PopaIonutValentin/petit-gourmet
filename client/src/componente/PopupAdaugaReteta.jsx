@@ -46,6 +46,7 @@ export default function PopupAdaugaReteta({pozitieButon, reteta = null, laSalvar
     const [eroarePoza, seteazaEroarePoza] = useState('');
     const [idRetetaSalvata, seteazaIdRetetaSalvata] = useState(null);
     const [trimitereIncercata, seteazaTrimitereIncercata] = useState(false);
+    const [rezumatInitial] = useState(rezumaFormularul);
     const punctApasare = useRef(null);
     const fereastra = useRef(null);
     const campTitlu = useRef(null);
@@ -59,14 +60,23 @@ export default function PopupAdaugaReteta({pozitieButon, reteta = null, laSalvar
         '--deplasare-y': (punctButon.y - window.innerHeight / 2) + 'px'
     } : {};
 
-    const areModificari =
-        titlu.trim() !== '' ||
-        descriere.trim() !== '' ||
-        idCategorie !== '' ||
-        estePrivata ||
-        ingrediente.some((ingredient) => ingredient.cantitate.trim() !== '' || ingredient.nume.trim() !== '') ||
-        pasi.some((pas) => pas.continut.trim() !== '') ||
-        poza !== null;
+    function rezumaFormularul()
+    {
+        return JSON.stringify({
+            titlu: titlu.trim(),
+            descriere: descriere.trim(),
+            idCategorie: idCategorie,
+            estePrivata: estePrivata,
+            ingrediente: ingrediente
+                .map((ingredient) => [ingredient.cantitate.trim(), ingredient.nume.trim()])
+                .filter((ingredient) => ingredient[0] !== '' || ingredient[1] !== ''),
+            pasi: pasi
+                .map((pas) => pas.continut.trim())
+                .filter((continut) => continut !== '')
+        });
+    }
+
+    const areModificari = rezumaFormularul() !== rezumatInitial || poza !== null;
 
     function gasesteErorile()
     {
@@ -429,6 +439,14 @@ export default function PopupAdaugaReteta({pozitieButon, reteta = null, laSalvar
                                     </button>
                                 </div>
                             )}
+                            {poza === null && reteta !== null && reteta.poza !== null && (
+                                <div className="reteta-poza-previzualizare">
+                                    <img
+                                        src={`/api/retete/${reteta.id}/poza?v=${encodeURIComponent(reteta.actualizat_la)}`}
+                                        alt="Poza actuala a retetei"
+                                    />
+                                </div>
+                            )}
                             <label className="reteta-poza-zona">
                                 <input
                                     ref={campPoza}
@@ -437,7 +455,7 @@ export default function PopupAdaugaReteta({pozitieButon, reteta = null, laSalvar
                                     onChange={alegePoza}
                                 />
                                 <ImagePlus aria-hidden="true" />
-                                {poza === null ? 'Alege o poza (optional)' : 'Schimba poza'}
+                                {poza === null && (reteta === null || reteta.poza === null) ? 'Alege o poza (optional)' : 'Schimba poza'}
                             </label>
                             {eroarePoza && <p role="alert" className="recenzie-mesaj recenzie-mesaj-eroare">{eroarePoza}</p>}
                         </div>
@@ -534,8 +552,8 @@ export default function PopupAdaugaReteta({pozitieButon, reteta = null, laSalvar
             </dialog>
             {confirmareDeschisa && (
                 <PopupConfirmare
-                    titlu="Renunti la reteta?"
-                    mesaj="Ce ai completat pana acum se va pierde."
+                    titlu={reteta !== null ? 'Renunti la modificari?' : 'Renunti la reteta?'}
+                    mesaj={reteta !== null ? 'Modificarile nesalvate se vor pierde.' : 'Ce ai completat pana acum se va pierde.'}
                     textAnulare="Continua editarea"
                     textConfirmare="Renunta"
                     punctPornire={punctConfirmare}
