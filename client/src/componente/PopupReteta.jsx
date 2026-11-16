@@ -1,23 +1,54 @@
 import {useState, useEffect, useRef} from 'react';
-import {X} from 'lucide-react';
+import {Trash2, X} from 'lucide-react';
 import {cerereApi} from '../api.js';
 import RecenziiReteta from './RecenziiReteta.jsx';
+import PopupConfirmare from './PopupConfirmare.jsx';
 
 const DURATA_ANIMATIE = 300;
 
-export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchidere, laIncarcareRecenzii})
+export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchidere, laIncarcareRecenzii, laStergere})
 {
     const [reteta, seteazaReteta] = useState(null);
     const [eroare, seteazaEroare] = useState('');
+    const [confirmareDeschisa, seteazaConfirmareDeschisa] = useState(false);
+    const [punctConfirmare, seteazaPunctConfirmare] = useState(null);
     const fereastra = useRef(null);
     const stilFereastra = pozitieCard ? {
         '--deplasare-x': (pozitieCard.left + pozitieCard.width / 2 - window.innerWidth / 2) + 'px',
         '--deplasare-y': (pozitieCard.top + pozitieCard.height / 2 - window.innerHeight / 2) + 'px'
     } : {};
+    const poateSterge = utilizator !== null && reteta !== null && (utilizator.id === reteta.autor_id || utilizator.rol === 'admin');
 
     function laInchidereaFerestrei()
     {
         setTimeout(laInchidere, DURATA_ANIMATIE);
+    }
+
+    function deschideConfirmarea(eveniment)
+    {
+        const dreptunghi = eveniment.currentTarget.getBoundingClientRect();
+
+        seteazaPunctConfirmare({
+            x: dreptunghi.left + dreptunghi.width / 2,
+            y: dreptunghi.top + dreptunghi.height / 2
+        });
+        seteazaConfirmareDeschisa(true);
+    }
+
+    async function stergeReteta()
+    {
+        seteazaEroare('');
+
+        try
+        {
+            await cerereApi('DELETE', '/retete/' + idReteta);
+            laStergere?.(idReteta);
+            fereastra.current.close();
+        }
+        catch (eroareCerere)
+        {
+            seteazaEroare(eroareCerere.message);
+        }
     }
 
     useEffect(() =>
@@ -32,7 +63,7 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
     {
         let ignora = false;
 
-        async function citesteReteta() 
+        async function citesteReteta()
         {
             try
             {
@@ -51,7 +82,7 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
                 }
             }
         }
-        
+
         citesteReteta();
 
         return () =>
@@ -61,63 +92,89 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
     }, [idReteta]);
 
     return (
-        <dialog
-            ref={fereastra}
-            className="popup"
-            style={stilFereastra}
-            closedby="any"
-            aria-labelledby="titluPopup"
-            onClose={laInchidereaFerestrei}
-        >
-            <button
-                type="button"
-                className="popup-inchidere"
-                aria-label="Inchide"
-                onClick={() => fereastra.current.close()}
+        <>
+            <dialog
+                ref={fereastra}
+                className="popup"
+                style={stilFereastra}
+                closedby="any"
+                aria-labelledby="titluPopup"
+                onClose={laInchidereaFerestrei}
             >
-                <X aria-hidden="true" />
-            </button>
-            <div className="popup-continut">
-                {reteta && reteta.poza && (
-                    <img
-                        src={`/api/retete/${reteta.id}/poza`}
-                        alt=""
-                        className="popup-poza"
-                    />
+                <button
+                    type="button"
+                    className="popup-inchidere"
+                    aria-label="Inchide"
+                    onClick={() => fereastra.current.close()}
+                >
+                    <X aria-hidden="true" />
+                </button>
+                {poateSterge && (
+                    <div className="popup-actiuni">
+                        <button
+                            type="button"
+                            className="popup-actiune popup-actiune-pericol"
+                            aria-label="Sterge reteta"
+                            onClick={deschideConfirmarea}
+                        >
+                            <Trash2 aria-hidden="true" />
+                        </button>
+                    </div>
                 )}
-                <div className="popup-text">
-                    <p role="alert">{eroare}</p>
-                    {!reteta && !eroare && <p>Se incarca reteta...</p>}
-                    {reteta && (
-                        <>
-                            <h2 id="titluPopup">{reteta.titlu}</h2>
-                            <p className="popup-autor">de {reteta.autor}</p>
-                            {reteta.descriere && <p>{reteta.descriere}</p>}
-                            <h3>Ingrediente</h3>
-                            <ul>
-                                {reteta.ingrediente.map((ingredient, pozitie) => (
-                                    <li key={pozitie}>
-                                        {ingredient.cantitate} {ingredient.nume}
-                                    </li>
-                                ))}
-                            </ul>
-                            <h3>Pasi</h3>
-                            <ol>
-                                {reteta.pasi.map((pas) => (
-                                    <li key={pas.numar}>{pas.continut}</li>
-                                ))}
-                            </ol>
-                            <RecenziiReteta 
-                                idReteta={reteta.id}
-                                idAutor={reteta.autor_id}
-                                estePrivata={reteta.vizibilitate === 'private'}
-                                utilizator={utilizator}
-                                laIncarcareRecenzii={laIncarcareRecenzii}
-                            />
-                        </>
+                <div className="popup-continut">
+                    {reteta && reteta.poza && (
+                        <img
+                            src={`/api/retete/${reteta.id}/poza`}
+                            alt=""
+                            className="popup-poza"
+                        />
                     )}
+                    <div className="popup-text">
+                        <p role="alert">{eroare}</p>
+                        {!reteta && !eroare && <p>Se incarca reteta...</p>}
+                        {reteta && (
+                            <>
+                                <h2 id="titluPopup">{reteta.titlu}</h2>
+                                <p className="popup-autor">de {reteta.autor}</p>
+                                {reteta.descriere && <p>{reteta.descriere}</p>}
+                                <h3>Ingrediente</h3>
+                                <ul>
+                                    {reteta.ingrediente.map((ingredient, pozitie) => (
+                                        <li key={pozitie}>
+                                            {ingredient.cantitate} {ingredient.nume}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <h3>Pasi</h3>
+                                <ol>
+                                    {reteta.pasi.map((pas) => (
+                                        <li key={pas.numar}>{pas.continut}</li>
+                                    ))}
+                                </ol>
+                                <RecenziiReteta
+                                    idReteta={reteta.id}
+                                    idAutor={reteta.autor_id}
+                                    estePrivata={reteta.vizibilitate === 'private'}
+                                    utilizator={utilizator}
+                                    laIncarcareRecenzii={laIncarcareRecenzii}
+                                />
+                            </>
+                        )}
+                    </div>
                 </div>
-            </div>
-        </dialog>
+            </dialog>
+            {confirmareDeschisa && (
+                <PopupConfirmare
+                    titlu="Stergi reteta?"
+                    mesaj="Reteta va fi stearsa definitiv. Actiunea nu poate fi anulata."
+                    textAnulare="Anuleaza"
+                    textConfirmare="Sterge"
+                    punctPornire={punctConfirmare}
+                    punctIesire={punctConfirmare}
+                    laConfirmare={stergeReteta}
+                    laInchidere={() => seteazaConfirmareDeschisa(false)}
+                />
+            )}
+        </>
     );
 }

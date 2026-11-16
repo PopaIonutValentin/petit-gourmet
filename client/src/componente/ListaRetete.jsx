@@ -46,6 +46,11 @@ export default function ListaRetete({filtre, utilizator, mesajGol})
         ));
     }
 
+    function scoateReteta(idReteta)
+    {
+        seteazaRetete((reteteVechi) => reteteVechi.filter((reteta) => reteta.id !== idReteta));
+    }
+
     async function incarcaMaiMulte()
     {
         seteazaSeIncarcaMaiMulte(true);
@@ -139,6 +144,7 @@ export default function ListaRetete({filtre, utilizator, mesajGol})
                     utilizator={utilizator}
                     laInchidere={() => seteazaIdRetetaDeschisa(null)}
                     laIncarcareRecenzii={actualizeazaStelele}
+                    laStergere={scoateReteta}
                 />
             )}
             <p role="alert">{eroare}</p>

@@ -1148,6 +1148,41 @@ h3
     border-color: var(--culoare-eroare);
 }
 
+.popup-actiuni
+{
+    position: absolute;
+    top: 12px;
+    right: 64px;
+    display: flex;
+    gap: 12px;
+}
+
+.popup-actiune
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background-color: var(--culoare-card);
+    color: var(--culoare-text);
+    box-shadow: 0 2px 8px rgba(41, 31, 29, 0.2);
+    cursor: pointer;
+}
+
+.popup-actiune-pericol
+{
+    color: var(--culoare-eroare);
+}
+
+.popup-actiune:focus-visible
+{
+    outline: 3px solid var(--culoare-accent);
+    outline-offset: 2px;
+}
+
 @media (max-width: 768px)
 {
     .meniu
