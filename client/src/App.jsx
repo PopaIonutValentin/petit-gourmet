@@ -9,6 +9,7 @@ import logo from './imagini/logo-petit-gourmet.webp';
 import PaginaCautare from './pagini/PaginaCautare.jsx';
 import PopupCautare from './componente/PopupCautare.jsx';
 import PopupAdaugaReteta from './componente/PopupAdaugaReteta.jsx';
+import PopupReteta from './componente/PopupReteta.jsx';
 
 function PaginaNegasita()
 {
@@ -25,6 +26,8 @@ export default function App()
     const [popupDoarCategorii, seteazaPopupDoarCategorii] = useState(false);
     const [adaugareDeschisa, seteazaAdaugareDeschisa] = useState(false);
     const [pozitieAdaugare, seteazaPozitieAdaugare] = useState(null);
+    const [idRetetaNoua, seteazaIdRetetaNoua] = useState(null);
+    const [versiuneRetete, seteazaVersiuneRetete] = useState(0);
     const navigheaza = useNavigate();
 
     useEffect(() =>
@@ -95,6 +98,12 @@ export default function App()
         seteazaAdaugareDeschisa(true);
     }
 
+    function inchideRetetaNoua()
+    {
+        seteazaIdRetetaNoua(null);
+        seteazaVersiuneRetete((versiuneVeche) => versiuneVeche + 1);
+    }
+
     return (
         <div className="aplicatie">
             <header className="antet-mobil">
@@ -123,12 +132,21 @@ export default function App()
             {adaugareDeschisa && (
                 <PopupAdaugaReteta
                     pozitieButon={pozitieAdaugare}
+                    laSalvare={seteazaIdRetetaNoua}
                     laInchidere={() => seteazaAdaugareDeschisa(false)}
+                />
+            )}
+            {idRetetaNoua !== null && !adaugareDeschisa && (
+                <PopupReteta
+                    idReteta={idRetetaNoua}
+                    pozitieCard={null}
+                    utilizator={utilizator}
+                    laInchidere={inchideRetetaNoua}
                 />
             )}
             <main className="continut">
                 <p role="alert">{eroareDeconectare}</p>
-                <Routes>
+                <Routes key={versiuneRetete}>
                     <Route path="/" element={<PaginaFeed utilizator={utilizator} />} />
                     <Route path="/cautare" element={<PaginaCautare utilizator={utilizator} laModificare={deschideCautarea} />} />
                     <Route path="/autentificare" element={<PaginaAutentificare laAutentificare={seteazaUtilizator} />} />

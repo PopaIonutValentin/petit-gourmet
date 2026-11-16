@@ -27,7 +27,7 @@ export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizat
                 if(!ignora)
                 {
                     seteazaRecenzii(raspuns.recenzii);
-                    laIncarcareRecenzii(idReteta, raspuns.recenzii);
+                    laIncarcareRecenzii?.(idReteta, raspuns.recenzii);
                 }
             }
             catch (eroareCerere)

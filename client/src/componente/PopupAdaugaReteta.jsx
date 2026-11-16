@@ -24,7 +24,7 @@ function numaraCaractere(text)
     return [...text.trim()].length;
 }
 
-export default function PopupAdaugaReteta({pozitieButon, laInchidere})
+export default function PopupAdaugaReteta({pozitieButon, laSalvare, laInchidere})
 {
     const [titlu, seteazaTitlu] = useState('');
     const [descriere, seteazaDescriere] = useState('');
@@ -304,6 +304,7 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
 
                 idReteta = raspuns.id;
                 seteazaIdRetetaSalvata(idReteta);
+                laSalvare(idReteta);
             }
 
             if(poza !== null)
