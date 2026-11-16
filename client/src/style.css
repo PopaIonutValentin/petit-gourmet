@@ -1135,6 +1135,19 @@ h3
     outline-offset: 2px;
 }
 
+.reteta-eroare-camp
+{
+    margin: -4px 0 0;
+    color: var(--culoare-eroare);
+    font-size: 0.9rem;
+}
+
+.reteta-formular input[aria-invalid="true"],
+.reteta-formular textarea[aria-invalid="true"]
+{
+    border-color: var(--culoare-eroare);
+}
+
 @media (max-width: 768px)
 {
     .meniu

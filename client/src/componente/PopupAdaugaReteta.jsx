@@ -2,6 +2,7 @@ import {useState, useEffect, useRef} from 'react';
 import {ImagePlus, Minus, Plus, X} from 'lucide-react';
 import {cerereApi} from '../api.js';
 import PopupConfirmare from './PopupConfirmare.jsx';
+import {flushSync} from 'react-dom';
 
 const DURATA_ANIMATIE = 300;
 const MAXIM_RANDURI = 50;
@@ -16,6 +17,11 @@ function creeazaIngredientGol()
 function creeazaPasGol()
 {
     return {cheie: crypto.randomUUID(), continut: ''};
+}
+
+function numaraCaractere(text)
+{
+    return [...text.trim()].length;
 }
 
 export default function PopupAdaugaReteta({pozitieButon, laInchidere})
@@ -35,6 +41,7 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
     const [adresaPrevizualizare, seteazaAdresaPrevizualizare] = useState('');
     const [eroarePoza, seteazaEroarePoza] = useState('');
     const [idRetetaSalvata, seteazaIdRetetaSalvata] = useState(null);
+    const [trimitereIncercata, seteazaTrimitereIncercata] = useState(false);
     const punctApasare = useRef(null);
     const fereastra = useRef(null);
     const campTitlu = useRef(null);
@@ -57,6 +64,37 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
         pasi.some((pas) => pas.continut.trim() !== '') ||
         poza !== null;
 
+    function gasesteErorile()
+    {
+        const eroriGasite = {};
+        const lungimeTitlu = numaraCaractere(titlu);
+        const lungimeDescriere = numaraCaractere(descriere);
+
+        if(lungimeTitlu < 3 || lungimeTitlu > 100)
+        {
+            eroriGasite.titlu = 'Titlul tre sa aiba intre 3 si 100 de caractere.';
+        }
+
+        if(lungimeDescriere < 10 || lungimeDescriere > 2000)
+        {
+            eroriGasite.descriere = 'Descrierea trebuie sa aiba intre 10 si 2000 de caractere.';
+        }
+
+        if(ingrediente.some((ingredient) => ingredient.cantitate.trim() === '' || ingredient.nume.trim() === ''))
+        {
+            eroriGasite.ingrediente = 'Completeaza cantitatea si numele la fiecare ingredient sau sterge randurile goale.';
+        }
+
+        if(pasi.some((pas) => pas.continut.trim() === ''))
+        {
+            eroriGasite.pasi = 'Completeaza fiecare pas sau sterge pasii goi.';
+        }
+
+        return eroriGasite;
+    }
+
+    const erori = trimitereIncercata && idRetetaSalvata === null ? gasesteErorile() : {};
+    
     function laInchidereaFerestrei()
     {
         setTimeout(laInchidere, DURATA_ANIMATIE);
@@ -235,6 +273,16 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
     async function trimiteReteta(eveniment)
     {
         eveniment.preventDefault();
+        
+        if(idRetetaSalvata === null && Object.keys(gasesteErorile()).length > 0)
+        {
+            flushSync(() =>
+            {
+                seteazaTrimitereIncercata(true);
+            });
+            fereastra.current.querySelector('[aria-invalid="true"]').focus();
+            return;
+        }
         seteazaEroare('');
         seteazaSeTrimite(true);
 
@@ -315,17 +363,23 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
                             id="titluReteta"
                             type="text"
                             maxLength={100}
+                            aria-invalid={erori.titlu !== undefined}
+                            aria-describedby={erori.titlu !== undefined ? 'eroareTitlu' : undefined}
                             value={titlu}
                             onChange={(eveniment) => seteazaTitlu(eveniment.target.value)}
                         />
+                        {erori.titlu && <p id="eroareTitlu" className="reteta-eroare-camp">{erori.titlu}</p>}
                         <label htmlFor="descriereReteta">Descriere</label>
                         <textarea
                             id="descriereReteta"
                             rows={3}
                             maxLength={2000}
+                            aria-invalid={erori.descriere !== undefined}
+                            aria-describedby={erori.descriere !== undefined ? 'eroareDescriere' : undefined}
                             value={descriere}
                             onChange={(eveniment) => seteazaDescriere(eveniment.target.value)}
                         />
+                        {erori.descriere && <p id="eroareDescriere" className="reteta-eroare-camp">{erori.descriere}</p>}
                         <label htmlFor="categorieReteta">Categorie</label>
                         <select
                             id="categorieReteta"
@@ -382,6 +436,8 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
                                         aria-label={'Cantitate, ingredientul ' + (pozitie + 1)}
                                         placeholder="Cantitate (ex. 200 g)"
                                         maxLength={50}
+                                        aria-invalid={erori.ingrediente !== undefined && ingredient.cantitate.trim() === ''}
+                                        aria-describedby={erori.ingrediente !== undefined ? 'eroareIngrediente' : undefined}
                                         autoFocus
                                         value={ingredient.cantitate}
                                         onChange={(eveniment) => modificaIngredientul(ingredient.cheie, 'cantitate', eveniment.target.value)}
@@ -391,6 +447,8 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
                                         aria-label={'Nume, ingredientul ' + (pozitie + 1)}
                                         placeholder="Ingredient (ex. faina)"
                                         maxLength={100}
+                                        aria-invalid={erori.ingrediente !== undefined && ingredient.nume.trim() === ''}
+                                        aria-describedby={erori.ingrediente !== undefined ? 'eroareIngrediente' : undefined}
                                         value={ingredient.nume}
                                         onChange={(eveniment) => modificaIngredientul(ingredient.cheie, 'nume', eveniment.target.value)}
                                     />
@@ -406,6 +464,7 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
                                     )}
                                 </div>
                             ))}
+                            {erori.ingrediente && <p id="eroareIngrediente" className="reteta-eroare-camp">{erori.ingrediente}</p>}
                             {ingrediente.length < MAXIM_RANDURI && (
                                 <button type="button" className="reteta-adauga-rand" onClick={adaugaIngredient}>
                                     <Plus aria-hidden="true" />
@@ -424,6 +483,8 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
                                             placeholder="Descrie pasul..."
                                             rows={2}
                                             maxLength={1000}
+                                            aria-invalid={erori.pasi !== undefined && pas.continut.trim() === ''}
+                                            aria-describedby={erori.pasi !== undefined ? 'eroarePasi' : undefined}
                                             autoFocus
                                             value={pas.continut}
                                             onChange={(eveniment) => modificaPasul(pas.cheie, eveniment.target.value)}
@@ -441,6 +502,7 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
                                     </li>
                                 ))}
                             </ol>
+                            {erori.pasi && <p id="eroarePasi" className="reteta-eroare-camp">{erori.pasi}</p>}
                             {pasi.length < MAXIM_RANDURI && (
                                 <button type="button" className="reteta-adauga-rand" onClick={adaugaPas}>
                                     <Plus aria-hidden="true" />
