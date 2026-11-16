@@ -1,6 +1,7 @@
 import {useState, useEffect, useRef} from 'react';
 import {Minus, Plus, X} from 'lucide-react';
 import {cerereApi} from '../api.js';
+import PopupConfirmare from './PopupConfirmare.jsx';
 
 const DURATA_ANIMATIE = 300;
 const MAXIM_RANDURI = 50;
@@ -26,6 +27,7 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
     const [categorii, seteazaCategorii] = useState([]);
     const [eroare, seteazaEroare] = useState('');
     const [seTrimite, seteazaSeTrimite] = useState(false);
+    const [confirmareDeschisa, seteazaConfirmareDeschisa] = useState(false);
     const fereastra = useRef(null);
     const campTitlu = useRef(null);
     const stilFereastra = pozitieButon ? {
@@ -33,9 +35,31 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
         '--deplasare-y': (pozitieButon.top + pozitieButon.height / 2 - window.innerHeight / 2) + 'px'
     } : {};
 
+    const areModificari =
+        titlu.trim() !== '' ||
+        descriere.trim() !== '' ||
+        idCategorie !== '' ||
+        estePrivata ||
+        ingrediente.some((ingredient) => ingredient.cantitate.trim() !== '' || ingredient.nume.trim() !== '') ||
+        pasi.some((pas) => pas.continut.trim() !== '');
+
     function laInchidereaFerestrei()
     {
         setTimeout(laInchidere, DURATA_ANIMATIE);
+    }
+
+    function laCerereDeInchidere(eveniment)
+    {
+        if(areModificari)
+        {
+            eveniment.preventDefault();
+            seteazaConfirmareDeschisa(true);
+        }
+    }
+
+    function renuntaLaReteta()
+    {
+        fereastra.current.close();
     }
 
     function modificaIngredientul(cheie, camp, valoare)
@@ -144,12 +168,14 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
     }
 
     return (
+        <>
         <dialog
             ref={fereastra}
             className="popup"
             style={stilFereastra}
             closedby="any"
             aria-labelledby="titluAdaugare"
+            onCancel={laCerereDeInchidere}
             onClose={laInchidereaFerestrei}
         >
             <button
@@ -284,5 +310,16 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
                 </form>
             </div>    
         </dialog>
+        {confirmareDeschisa && (
+            <PopupConfirmare
+                titlu="Renunti la reteta?"
+                mesaj="Ce ai completat pana acum se va pierde."
+                textAnulare="Continua editarea"
+                textConfirmare="Renunta"
+                laConfirmare={renuntaLaReteta}
+                laInchidere={() => seteazaConfirmareDeschisa(false)}
+            />
+        )}
+    </>
     );
 }

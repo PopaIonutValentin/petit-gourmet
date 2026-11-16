@@ -1013,6 +1013,47 @@ h3
     cursor: pointer;
 }
 
+.popup-confirmare
+{
+    width: min(420px, calc(100% - 32px));
+}
+
+.popup-confirmare-butoane
+{
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.popup-confirmare-butoane button
+{
+    padding: 10px 20px;
+    border-radius: 12px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.popup-confirmare-anulare
+{
+    border: 2px solid var(--culoare-buton);
+    background-color: var(--culoare-card);
+    color: var(--culoare-buton)
+}
+
+.popup-confirmare-pericol
+{
+    border: 2px solid var(--culoare-eroare);
+    background-color: var(--culoare-eroare);
+    color: var(--culoare-text-buton);
+}
+
+.popup-confirmare-butoane button:focus-visible
+{
+    outline: 3px solid var(--culoare-accent);
+    outline-offset: 2px;
+}
+
 .reteta-formular button[type="submit"]:disabled
 {
     opacity: 0.6;
