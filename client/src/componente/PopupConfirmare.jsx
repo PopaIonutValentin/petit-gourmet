@@ -1,11 +1,18 @@
-import {useEffect, useRef} from "react";
+import {useState, useEffect, useRef} from 'react';
+import {flushSync} from 'react-dom';
 
 const DURATA_ANIMATIE = 300;
 
-export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirmare, laConfirmare, laInchidere})
+export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirmare, punctPornire, punctIesire, laConfirmare, laInchidere})
 {
     const fereastra = useRef(null);
+    const [seConfirma, seteazaSeConfirma] = useState(false);
     const butonAnulare = useRef(null);
+    const punctAnimatie = seConfirma ? punctIesire : punctPornire;
+    const stilFereastra = punctAnimatie ? {
+        '--deplasare-x': (punctAnimatie.x - window.innerWidth / 2) + 'px',
+        '--deplasare-y': (punctAnimatie.y - window.innerHeight / 2) + 'px'
+    } : {};
 
     function laInchidereaFerestrei()
     {
@@ -14,6 +21,10 @@ export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirma
 
     function confirma()
     {
+        flushSync(() => 
+        {
+            seteazaSeConfirma(true);
+        });
         fereastra.current.close();
         laConfirmare();
     }
@@ -31,6 +42,7 @@ export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirma
         <dialog
             ref={fereastra}
             className="popup popup-confirmare"
+            style={stilFereastra}
             role="alertdialog"
             closedby="any"
             aria-labelledby="titluConfirmare"

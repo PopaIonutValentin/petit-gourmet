@@ -1038,7 +1038,7 @@ h3
 {
     border: 2px solid var(--culoare-buton);
     background-color: var(--culoare-card);
-    color: var(--culoare-buton)
+    color: var(--culoare-buton);
 }
 
 .popup-confirmare-pericol

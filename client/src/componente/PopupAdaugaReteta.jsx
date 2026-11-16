@@ -28,11 +28,17 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
     const [eroare, seteazaEroare] = useState('');
     const [seTrimite, seteazaSeTrimite] = useState(false);
     const [confirmareDeschisa, seteazaConfirmareDeschisa] = useState(false);
+    const [punctConfirmare, seteazaPunctConfirmare] = useState(null);
+    const punctApasare = useRef(null);
     const fereastra = useRef(null);
     const campTitlu = useRef(null);
-    const stilFereastra = pozitieButon ? {
-        '--deplasare-x': (pozitieButon.left + pozitieButon.width / 2 - window.innerWidth / 2) + 'px',
-        '--deplasare-y': (pozitieButon.top + pozitieButon.height / 2 - window.innerHeight / 2) + 'px'
+    const punctButon = pozitieButon ? {
+        x: pozitieButon.left + pozitieButon.width / 2,
+        y: pozitieButon.top + pozitieButon.height / 2
+    } : null;
+    const stilFereastra = punctButon ? {
+        '--deplasare-x': (punctButon.x - window.innerWidth / 2) + 'px',
+        '--deplasare-y': (punctButon.y - window.innerHeight / 2) + 'px'
     } : {};
 
     const areModificari =
@@ -53,8 +59,38 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
         if(areModificari)
         {
             eveniment.preventDefault();
+            seteazaPunctConfirmare(punctApasare.current);
             seteazaConfirmareDeschisa(true);
         }
+
+        punctApasare.current = null;
+    }
+
+    function retinePunctulApasarii(eveniment)
+    {
+        if(eveniment.target === eveniment.currentTarget)
+        {
+            punctApasare.current = {x: eveniment.clientX, y: eveniment.clientY};
+        }
+    }
+
+    function uitaPunctulLaEsc(eveniment)
+    {
+        if(eveniment.key === 'Escape')
+        {
+            punctApasare.current = null;
+        }
+    }
+
+    function inchidereDinButon(eveniment)
+    {
+        const dreptunghi = eveniment.currentTarget.getBoundingClientRect();
+
+        punctApasare.current = {
+            x: dreptunghi.left + dreptunghi.width / 2,
+            y: dreptunghi.top + dreptunghi.height / 2
+        };
+        fereastra.current.requestClose();
     }
 
     function renuntaLaReteta()
@@ -177,12 +213,14 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
             aria-labelledby="titluAdaugare"
             onCancel={laCerereDeInchidere}
             onClose={laInchidereaFerestrei}
+            onPointerDown={retinePunctulApasarii}
+            onKeyDown={uitaPunctulLaEsc}
         >
             <button
                 type="button"
                 className="popup-inchidere"
                 aria-label="Inchide"
-                onClick={() => fereastra.current.requestClose()}
+                onClick={inchidereDinButon}
             >
                 <X aria-hidden="true" />
             </button>
@@ -316,6 +354,8 @@ export default function PopupAdaugaReteta({pozitieButon, laInchidere})
                 mesaj="Ce ai completat pana acum se va pierde."
                 textAnulare="Continua editarea"
                 textConfirmare="Renunta"
+                punctPornire={punctConfirmare}
+                punctIesire={punctButon}
                 laConfirmare={renuntaLaReteta}
                 laInchidere={() => seteazaConfirmareDeschisa(false)}
             />
