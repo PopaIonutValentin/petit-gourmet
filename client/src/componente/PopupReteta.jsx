@@ -13,15 +13,28 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
     const [confirmareDeschisa, seteazaConfirmareDeschisa] = useState(false);
     const [punctConfirmare, seteazaPunctConfirmare] = useState(null);
     const fereastra = useRef(null);
-    const stilFereastra = pozitieCard ? {
-        '--deplasare-x': (pozitieCard.left + pozitieCard.width / 2 - window.innerWidth / 2) + 'px',
-        '--deplasare-y': (pozitieCard.top + pozitieCard.height / 2 - window.innerHeight / 2) + 'px'
+    const stearsa = useRef(false);
+    const punctCard = pozitieCard ? {
+        x: pozitieCard.left + pozitieCard.width / 2,
+        y: pozitieCard.top + pozitieCard.height / 2
+    } : null;
+    const stilFereastra = punctCard ? {
+        '--deplasare-x': (punctCard.x - window.innerWidth / 2) + 'px',
+        '--deplasare-y': (punctCard.y - window.innerHeight / 2) + 'px'
     } : {};
     const poateSterge = utilizator !== null && reteta !== null && (utilizator.id === reteta.autor_id || utilizator.rol === 'admin');
-
+    
     function laInchidereaFerestrei()
     {
-        setTimeout(laInchidere, DURATA_ANIMATIE);
+        setTimeout(() => 
+        {
+            if(stearsa.current)
+            {
+                laStergere?.(idReteta);
+            }
+
+            laInchidere();
+        }, DURATA_ANIMATIE);
     }
 
     function deschideConfirmarea(eveniment)
@@ -42,12 +55,14 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
         try
         {
             await cerereApi('DELETE', '/retete/' + idReteta);
-            laStergere?.(idReteta);
+            stearsa.current = true;
             fereastra.current.close();
+            return true;
         }
         catch (eroareCerere)
         {
             seteazaEroare(eroareCerere.message);
+            return false;
         }
     }
 
@@ -170,7 +185,7 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
                     textAnulare="Anuleaza"
                     textConfirmare="Sterge"
                     punctPornire={punctConfirmare}
-                    punctIesire={punctConfirmare}
+                    punctIesire={punctCard}
                     laConfirmare={stergeReteta}
                     laInchidere={() => seteazaConfirmareDeschisa(false)}
                 />

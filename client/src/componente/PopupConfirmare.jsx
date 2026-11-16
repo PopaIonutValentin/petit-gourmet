@@ -7,6 +7,7 @@ export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirma
 {
     const fereastra = useRef(null);
     const [seConfirma, seteazaSeConfirma] = useState(false);
+    const [seAsteapta, seteazaSeAsteapta] = useState(false);
     const butonAnulare = useRef(null);
     const punctAnimatie = seConfirma ? punctIesire : punctPornire;
     const stilFereastra = punctAnimatie ? {
@@ -19,14 +20,24 @@ export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirma
         setTimeout(laInchidere, DURATA_ANIMATIE);
     }
 
-    function confirma()
+    async function confirma()
     {
-        flushSync(() => 
+        seteazaSeAsteapta(true);
+
+        const reusit = await laConfirmare();
+
+        if(reusit === false)
+        {
+            seteazaSeAsteapta(false);
+            fereastra.current.close();
+            return;
+        }
+
+        flushSync(() =>
         {
             seteazaSeConfirma(true);
         });
         fereastra.current.close();
-        laConfirmare();
     }
 
     useEffect(() => 
@@ -64,9 +75,10 @@ export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirma
                     <button
                         type="button"
                         className="popup-confirmare-pericol"
+                        disabled={seAsteapta}
                         onClick={confirma}
                     >
-                        {textConfirmare}
+                        {seAsteapta ? 'Se proceseaza...' : textConfirmare}
                     </button>
                 </div>
             </div>
