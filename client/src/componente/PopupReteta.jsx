@@ -1,19 +1,24 @@
 import {useState, useEffect, useRef} from 'react';
-import {Trash2, X} from 'lucide-react';
+import {Pencil, Trash2, X} from 'lucide-react';
 import {cerereApi} from '../api.js';
 import RecenziiReteta from './RecenziiReteta.jsx';
 import PopupConfirmare from './PopupConfirmare.jsx';
+import PopupAdaugaReteta from './PopupAdaugaReteta.jsx';
 
 const DURATA_ANIMATIE = 300;
 
-export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchidere, laIncarcareRecenzii, laStergere})
+export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchidere, laIncarcareRecenzii, laIncarcareReteta, laStergere})
 {
     const [reteta, seteazaReteta] = useState(null);
     const [eroare, seteazaEroare] = useState('');
     const [confirmareDeschisa, seteazaConfirmareDeschisa] = useState(false);
     const [punctConfirmare, seteazaPunctConfirmare] = useState(null);
+    const [editareDeschisa, seteazaEditareDeschisa] = useState(false);
+    const [pozitieEditare, seteazaPozitieEditare] = useState(null);
+    const [versiuneReteta, seteazaVersiuneReteta] = useState(0);
     const fereastra = useRef(null);
     const stearsa = useRef(false);
+    const retetaEditata = useRef(false);
     const punctCard = pozitieCard ? {
         x: pozitieCard.left + pozitieCard.width / 2,
         y: pozitieCard.top + pozitieCard.height / 2
@@ -23,6 +28,7 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
         '--deplasare-y': (punctCard.y - window.innerHeight / 2) + 'px'
     } : {};
     const poateSterge = utilizator !== null && reteta !== null && (utilizator.id === reteta.autor_id || utilizator.rol === 'admin');
+    const poateEdita = utilizator !== null && reteta !== null && utilizator.id === reteta.autor_id;
     
     function laInchidereaFerestrei()
     {
@@ -46,6 +52,28 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
             y: dreptunghi.top + dreptunghi.height / 2
         });
         seteazaConfirmareDeschisa(true);
+    }
+
+    function deschideEditarea(eveniment)
+    {
+        seteazaPozitieEditare(eveniment.currentTarget.getBoundingClientRect());
+        seteazaEditareDeschisa(true);
+    }
+
+    function laSalvareaEditarii()
+    {
+        retetaEditata.current = true;
+    }
+
+    function inchideEditarea()
+    {
+        seteazaEditareDeschisa(false);
+
+        if(retetaEditata.current)
+        {
+            retetaEditata.current = false;
+            seteazaVersiuneReteta((versiuneVeche) => versiuneVeche + 1);
+        }
     }
 
     async function stergeReteta()
@@ -87,6 +115,7 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
                 if(!ignora)
                 {
                     seteazaReteta(raspuns.reteta);
+                    laIncarcareReteta?.(raspuns.reteta);
                 }
             }
             catch (eroareCerere)
@@ -104,7 +133,7 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
         {
             ignora = true;
         };
-    }, [idReteta]);
+    }, [idReteta, versiuneReteta]);
 
     return (
         <>
@@ -124,22 +153,34 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
                 >
                     <X aria-hidden="true" />
                 </button>
-                {poateSterge && (
+                {(poateEdita || poateSterge) && (
                     <div className="popup-actiuni">
-                        <button
-                            type="button"
-                            className="popup-actiune popup-actiune-pericol"
-                            aria-label="Sterge reteta"
-                            onClick={deschideConfirmarea}
-                        >
-                            <Trash2 aria-hidden="true" />
-                        </button>
+                        {poateEdita && (
+                            <button
+                                type="button"
+                                className="popup-actiune"
+                                aria-label="Editeaza reteta"
+                                onClick={deschideEditarea}
+                            >
+                                <Pencil aria-hidden="true" />
+                            </button>
+                        )}
+                        {poateSterge && (
+                            <button
+                                type="button"
+                                className="popup-actiune popup-actiune-pericol"
+                                aria-label="Sterge reteta"
+                                onClick={deschideConfirmarea}
+                            >
+                                <Trash2 aria-hidden="true" />
+                            </button>
+                        )}
                     </div>
                 )}
                 <div className="popup-continut">
                     {reteta && reteta.poza && (
                         <img
-                            src={`/api/retete/${reteta.id}/poza`}
+                            src={`/api/retete/${reteta.id}/poza?v=${encodeURIComponent(reteta.actualizat_la)}`}
                             alt=""
                             className="popup-poza"
                         />
@@ -188,6 +229,15 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
                     punctIesire={punctCard}
                     laConfirmare={stergeReteta}
                     laInchidere={() => seteazaConfirmareDeschisa(false)}
+                />
+            )}
+
+            {editareDeschisa && (
+                <PopupAdaugaReteta
+                    pozitieButon={pozitieEditare}
+                    reteta={reteta}
+                    laSalvare={laSalvareaEditarii}
+                    laInchidere={inchideEditarea}
                 />
             )}
         </>

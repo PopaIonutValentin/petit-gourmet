@@ -51,6 +51,26 @@ export default function ListaRetete({filtre, utilizator, mesajGol})
         seteazaRetete((reteteVechi) => reteteVechi.filter((reteta) => reteta.id !== idReteta));
     }
 
+    function actualizeazaCardul(retetaNoua)
+    {
+        if(retetaNoua.vizibilitate === 'private')
+        {
+            scoateReteta(retetaNoua.id);
+            return;
+        }
+
+        seteazaRetete((reteteVechi) => reteteVechi.map((reteta) =>
+            reteta.id === retetaNoua.id ? {
+                ...reteta,
+                titlu: retetaNoua.titlu,
+                categorie_id: retetaNoua.categorie_id,
+                categorie: retetaNoua.categorie,
+                are_poza: retetaNoua.poza !== null,
+                actualizat_la: retetaNoua.actualizat_la
+            } : reteta
+        ));
+    }
+
     async function incarcaMaiMulte()
     {
         seteazaSeIncarcaMaiMulte(true);
@@ -144,6 +164,7 @@ export default function ListaRetete({filtre, utilizator, mesajGol})
                     utilizator={utilizator}
                     laInchidere={() => seteazaIdRetetaDeschisa(null)}
                     laIncarcareRecenzii={actualizeazaStelele}
+                    laIncarcareReteta={actualizeazaCardul}
                     laStergere={scoateReteta}
                 />
             )}

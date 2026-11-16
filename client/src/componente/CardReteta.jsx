@@ -20,12 +20,15 @@ export default function CardReteta({reteta, laDeschidere})
 {
     const [pozaIncarcata, seteazaPozaIncarcata] = useState(false);
     const [pozaEsuata, seteazaPozaEsuata] = useState(false);
+    const adresaPoza = reteta.actualizat_la
+        ? `/api/retete/${reteta.id}/poza?v=${encodeURIComponent(reteta.actualizat_la)}`
+        : `/api/retete/${reteta.id}/poza`;
 
     return (
         <article className="card-reteta">
             {reteta.are_poza && !pozaEsuata ? (
                 <img 
-                    src={`/api/retete/${reteta.id}/poza`}
+                    src={adresaPoza}
                     alt=""
                     className={pozaIncarcata ? 'card-reteta-poza' : 'card-reteta-poza card-reteta-poza-schelet'}
                     loading="lazy"

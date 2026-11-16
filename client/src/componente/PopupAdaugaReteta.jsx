@@ -24,14 +24,18 @@ function numaraCaractere(text)
     return [...text.trim()].length;
 }
 
-export default function PopupAdaugaReteta({pozitieButon, laSalvare, laInchidere})
+export default function PopupAdaugaReteta({pozitieButon, reteta = null, laSalvare, laInchidere})
 {
-    const [titlu, seteazaTitlu] = useState('');
-    const [descriere, seteazaDescriere] = useState('');
-    const [idCategorie, seteazaIdCategorie] = useState('');
-    const [estePrivata, seteazaEstePrivata] = useState(false);
-    const [ingrediente, seteazaIngrediente] = useState(() => [creeazaIngredientGol()]);
-    const [pasi, seteazaPasi] = useState(() => [creeazaPasGol()]);
+    const [titlu, seteazaTitlu] = useState(reteta !== null ? reteta.titlu : '');
+    const [descriere, seteazaDescriere] = useState(reteta !== null ? reteta.descriere : '');
+    const [idCategorie, seteazaIdCategorie] = useState(reteta !== null && reteta.categorie_id !== null ? String(reteta.categorie_id) : '');
+    const [estePrivata, seteazaEstePrivata] = useState(reteta !== null && reteta.vizibilitate === 'private');
+    const [ingrediente, seteazaIngrediente] = useState(() => reteta !== null
+        ? reteta.ingrediente.map((ingredient) => ({cheie: crypto.randomUUID(), cantitate: ingredient.cantitate, nume: ingredient.nume}))
+        : [creeazaIngredientGol()]);
+    const [pasi, seteazaPasi] = useState(() => reteta !== null
+        ? reteta.pasi.map((pas) => ({cheie: crypto.randomUUID(), continut: pas.continut}))
+        : [creeazaPasGol()]);
     const [categorii, seteazaCategorii] = useState([]);
     const [eroare, seteazaEroare] = useState('');
     const [seTrimite, seteazaSeTrimite] = useState(false);
@@ -72,7 +76,7 @@ export default function PopupAdaugaReteta({pozitieButon, laSalvare, laInchidere}
 
         if(lungimeTitlu < 3 || lungimeTitlu > 100)
         {
-            eroriGasite.titlu = 'Titlul tre sa aiba intre 3 si 100 de caractere.';
+            eroriGasite.titlu = 'Titlul trebuie sa aiba intre 3 si 100 de caractere.';
         }
 
         if(lungimeDescriere < 10 || lungimeDescriere > 2000)
@@ -273,7 +277,7 @@ export default function PopupAdaugaReteta({pozitieButon, laSalvare, laInchidere}
     async function trimiteReteta(eveniment)
     {
         eveniment.preventDefault();
-        
+
         if(idRetetaSalvata === null && Object.keys(gasesteErorile()).length > 0)
         {
             flushSync(() =>
@@ -283,24 +287,32 @@ export default function PopupAdaugaReteta({pozitieButon, laSalvare, laInchidere}
             fereastra.current.querySelector('[aria-invalid="true"]').focus();
             return;
         }
+
         seteazaEroare('');
         seteazaSeTrimite(true);
 
+        const dateReteta = {
+            titlu: titlu,
+            descriere: descriere,
+            vizibilitate: estePrivata ? 'private' : 'public',
+            categorie_id: idCategorie === '' ? null : Number(idCategorie),
+            ingrediente: ingrediente.map((ingredient) => ({nume: ingredient.nume, cantitate: ingredient.cantitate})),
+            pasi: pasi.map((pas) => pas.continut)
+        };
         let idReteta = idRetetaSalvata;
+        let seTrimitePoza = false;
 
         try
-        {
-            if(idReteta === null)
+        { 
+            if(reteta !== null)
             {
-                const raspuns = await cerereApi('POST', '/retete',
-                {
-                    titlu: titlu,
-                    descriere: descriere,
-                    vizibilitate: estePrivata ? 'private' : 'public',
-                    categorie_id: idCategorie === '' ? null : Number(idCategorie),
-                    ingrediente: ingrediente.map((ingredient) => ({nume: ingredient.nume, cantitate: ingredient.cantitate})),
-                    pasi: pasi.map((pas) => pas.continut)
-                });
+                await cerereApi('PUT', '/retete/' + reteta.id, dateReteta);
+                idReteta = reteta.id;
+                laSalvare(idReteta);
+            }
+            else if(idReteta === null)
+            {
+                const raspuns = await cerereApi('POST', '/retete', dateReteta);
 
                 idReteta = raspuns.id;
                 seteazaIdRetetaSalvata(idReteta);
@@ -311,6 +323,7 @@ export default function PopupAdaugaReteta({pozitieButon, laSalvare, laInchidere}
             {
                 const datePoza = new FormData();
 
+                seTrimitePoza = true;
                 datePoza.append('poza', poza);
                 await cerereApi('POST', '/retete/' + idReteta + '/poza', datePoza);
             }
@@ -319,13 +332,13 @@ export default function PopupAdaugaReteta({pozitieButon, laSalvare, laInchidere}
         }
         catch (eroareCerere)
         {
-            if(idReteta === null)
+            if(seTrimitePoza)
             {
-                seteazaEroare(eroareCerere.message);
+                seteazaEroare('Reteta a fost salvata, dar poza nu: ' + eroareCerere.message);
             }
             else
             {
-                seteazaEroare('Reteta a fost salvata, dar poza nu: ' + eroareCerere.message);
+                seteazaEroare(eroareCerere.message);
             }
         }
         finally
@@ -357,7 +370,7 @@ export default function PopupAdaugaReteta({pozitieButon, laSalvare, laInchidere}
                 </button>
                 <div className="popup-continut">
                     <form className="popup-text reteta-formular" onSubmit={trimiteReteta} noValidate>
-                        <h2 id="titluAdaugare">Adauga o reteta</h2>
+                        <h2 id="titluAdaugare">{reteta !== null ? 'Editeaza reteta' : 'Adauga o reteta'}</h2>
                         <label htmlFor="titluReteta">Titlu</label>
                         <input
                             ref={campTitlu}
@@ -514,7 +527,7 @@ export default function PopupAdaugaReteta({pozitieButon, laSalvare, laInchidere}
                         {eroare && <p role="alert" className="recenzie-mesaj recenzie-mesaj-eroare">{eroare}</p>}
                         <button type="submit" disabled={seTrimite}>
                             <Plus aria-hidden="true" />
-                            {seTrimite ? 'Se salveaza...' : (idRetetaSalvata === null ? 'Adauga reteta' : 'Salveaza poza')}
+                            {seTrimite ? 'Se salveaza...' : (reteta !== null ? 'Salveaza modificarile' : (idRetetaSalvata === null ? 'Adauga reteta' : 'Salveaza poza'))}
                         </button>
                     </form>
                 </div>
