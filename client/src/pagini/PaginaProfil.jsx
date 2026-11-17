@@ -1,9 +1,23 @@
+import {useState} from 'react';
 import {Navigate} from 'react-router';
-import {LoaderCircle} from 'lucide-react';
+import {LoaderCircle, Trash2} from 'lucide-react';
 import ListaRetete from '../componente/ListaRetete.jsx';
+import PopupStergereCont from '../componente/PopupStergereCont.jsx';
 
-export default function PaginaProfil({utilizator, seVerifica})
+export default function PaginaProfil({utilizator, seVerifica, laStergereCont})
 {
+    const [punctStergere, seteazaPunctStergere] = useState(null);
+
+    function deschideStergerea(eveniment)
+    {
+        const dreptunghi = eveniment.currentTarget.getBoundingClientRect();
+
+        seteazaPunctStergere({
+            x: dreptunghi.left + dreptunghi.width / 2,
+            y: dreptunghi.top + dreptunghi.height / 2
+        });
+    }
+
     if(seVerifica)
     {
         return (
@@ -42,7 +56,26 @@ export default function PaginaProfil({utilizator, seVerifica})
                 utilizator={utilizator}
                 cuPrivate
                 mesajGol={<p>Nu ai adaugat inca nicio reteta.</p>}
+                continutFinal={
+                    <section className="profil-pericol" aria-labelledby="titluPericol">
+                        <div>
+                            <h2 id="titluPericol">Stergerea contului</h2>
+                            <p>Retetele, pozele si recenziile tale se sterg definitiv.</p>
+                        </div>
+                        <button type="button" className="profil-sterge-cont" onClick={deschideStergerea}>
+                            <Trash2 aria-hidden="true" />
+                            Sterge contul
+                        </button>
+                    </section>
+                }
             />
+            {punctStergere !== null && (
+                <PopupStergereCont
+                    punctPornire={punctStergere}
+                    laStergere={laStergereCont}
+                    laInchidere={() => seteazaPunctStergere(null)}
+                />
+            )}
         </>
     );
 }

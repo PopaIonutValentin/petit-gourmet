@@ -105,6 +105,12 @@ export default function App()
         seteazaVersiuneRetete((versiuneVeche) => versiuneVeche + 1);
     }
 
+    function laStergereaContului()
+    {
+        seteazaUtilizator(null);
+        navigheaza('/');
+    }
+
     return (
         <div className="aplicatie">
             <header className="antet-mobil">
@@ -150,7 +156,7 @@ export default function App()
                 <Routes key={versiuneRetete}>
                     <Route path="/" element={<PaginaFeed utilizator={utilizator} />} />
                     <Route path="/cautare" element={<PaginaCautare utilizator={utilizator} laModificare={deschideCautarea} />} />
-                    <Route path="/profil" element={<PaginaProfil utilizator={utilizator} seVerifica={seVerifica} />} />
+                    <Route path="/profil" element={<PaginaProfil utilizator={utilizator} seVerifica={seVerifica} laStergereCont={laStergereaContului} />} />
                     <Route path="/autentificare" element={<PaginaAutentificare laAutentificare={seteazaUtilizator} />} />
                     <Route path="/inregistrare" element={<PaginaInregistrare />} />
                     <Route path="*" element={<PaginaNegasita />} />

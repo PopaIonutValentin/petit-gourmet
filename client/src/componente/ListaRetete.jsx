@@ -18,7 +18,7 @@ function construiesteCalea(cale, filtre, cursor)
     return textParametri === '' ? cale : cale + '?' + textParametri;
 }
 
-export default function ListaRetete({cale = '/retete', filtre, utilizator, mesajGol, cuPrivate = false})
+export default function ListaRetete({cale = '/retete', filtre, utilizator, mesajGol, cuPrivate = false, continutFinal})
 {
     const [retete, seteazaRetete] = useState([]);
     const [seIncarca, seteazaSeIncarca] = useState(true);
@@ -168,7 +168,7 @@ export default function ListaRetete({cale = '/retete', filtre, utilizator, mesaj
                     laStergere={scoateReteta}
                 />
             )}
-            <p role="alert">{eroare}</p>
+                       <p role="alert">{eroare}</p>
             {seIncarca && (
                 <div className="feed-incarcare">
                     <p className="recenzie-mesaj">
@@ -195,7 +195,8 @@ export default function ListaRetete({cale = '/retete', filtre, utilizator, mesaj
                     )}
                 </div>
             )}
-            {!seIncarca && !eroare && cursor === null && retete.length > 0 && (
+            {!seIncarca && !eroare && cursor === null && continutFinal}
+            {!seIncarca && !eroare && cursor === null && retete.length > 0 && continutFinal === undefined && (
                 <div className="feed-final">
                     <p className="recenzie-mesaj">
                         <CircleCheck aria-hidden="true" />
