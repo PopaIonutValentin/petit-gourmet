@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {ChefHat, Star} from 'lucide-react';
+import {ChefHat, Lock, Star} from 'lucide-react';
 
 function textRecenzii(numar)
 {
@@ -26,6 +26,13 @@ export default function CardReteta({reteta, laDeschidere})
 
     return (
         <article className="card-reteta">
+            {reteta.vizibilitate === 'private' && (
+                <span className="card-reteta-privata">
+                    <Lock aria-hidden="true" />
+                    Privata
+                </span>
+            )}
+
             {reteta.are_poza && !pozaEsuata ? (
                 <img 
                     src={adresaPoza}

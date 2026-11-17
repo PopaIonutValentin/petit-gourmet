@@ -7,6 +7,8 @@ const utilizatori = require('../models/utilizatori');
 const {doarLogat} = require('../middleware/acces');
 const incercari = require('../models/incercari');
 const {stergeContulCuPoze} = require('../utils/sterge-cont');
+const retete = require('../models/retete');
+const {citesteFiltreFeed} = require('../utils/filtre-feed');
 
 
 const router = express.Router();
@@ -20,6 +22,7 @@ const MAXIM_PE_IP = 20;
 const MESAJ_PREA_MULTE = 'Prea multe incercari. Incearca din nou mai tarziu.';
 const FEREASTRA_INREGISTRARE_MS = 60*60*1000;
 const MAXIM_INREGISTRARE_PE_IP = 5;
+const MARIME_PAGINA = 20;
 
 router.post('/inregistrare', async (req, res) =>
 {
@@ -185,6 +188,27 @@ router.delete('/eu', doarLogat, async (req, res, next) =>
 
         res.clearCookie('sid');
         res.json({mesaj: 'Contul a fost sters.'});
+    });
+});
+
+router.get('/eu/retete', doarLogat, (req, res) =>
+{
+    const rezultat = citesteFiltreFeed({dupa: req.query.dupa});
+
+    if(rezultat.eroare)
+    {
+        return res.status(400).json({eroare: rezultat.eroare});
+    }
+
+    const gasite = retete.listeazaReteteleAutorului(req.utilizator.id, rezultat.filtre.dupa, MARIME_PAGINA + 1);
+    const maiSunt = gasite.length > MARIME_PAGINA;
+    const pagina = gasite.slice(0, MARIME_PAGINA);
+
+    res.set('Cache-Control', 'no-store');
+    res.json
+    ({
+        retete: pagina,
+        urmatorulCursor: maiSunt ? pagina[pagina.length - 1].id : null
     });
 });
 

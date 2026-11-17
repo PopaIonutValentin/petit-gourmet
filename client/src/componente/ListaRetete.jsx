@@ -4,7 +4,7 @@ import {cerereApi} from '../api.js';
 import CardReteta from './CardReteta.jsx';
 import PopupReteta from './PopupReteta.jsx';
 
-function construiesteCalea(filtre, cursor)
+function construiesteCalea(cale, filtre, cursor)
 {
     const parametri = new URLSearchParams(filtre);
 
@@ -15,10 +15,10 @@ function construiesteCalea(filtre, cursor)
 
     const textParametri = parametri.toString();
 
-    return textParametri === '' ? '/retete' : '/retete?' + textParametri;
+    return textParametri === '' ? cale : cale + '?' + textParametri;
 }
 
-export default function ListaRetete({filtre, utilizator, mesajGol})
+export default function ListaRetete({cale = '/retete', filtre, utilizator, mesajGol, cuPrivate = false})
 {
     const [retete, seteazaRetete] = useState([]);
     const [seIncarca, seteazaSeIncarca] = useState(true);
@@ -53,7 +53,7 @@ export default function ListaRetete({filtre, utilizator, mesajGol})
 
     function actualizeazaCardul(retetaNoua)
     {
-        if(retetaNoua.vizibilitate === 'private')
+        if(retetaNoua.vizibilitate === 'private' && !cuPrivate)
         {
             scoateReteta(retetaNoua.id);
             return;
@@ -65,6 +65,7 @@ export default function ListaRetete({filtre, utilizator, mesajGol})
                 titlu: retetaNoua.titlu,
                 categorie_id: retetaNoua.categorie_id,
                 categorie: retetaNoua.categorie,
+                vizibilitate: retetaNoua.vizibilitate,
                 are_poza: retetaNoua.poza !== null,
                 actualizat_la: retetaNoua.actualizat_la
             } : reteta
@@ -77,7 +78,7 @@ export default function ListaRetete({filtre, utilizator, mesajGol})
 
         try
         {
-            const raspuns = await cerereApi('GET', construiesteCalea(filtre, cursor));
+            const raspuns = await cerereApi('GET', construiesteCalea(cale, filtre, cursor));
 
             seteazaRetete((reteteVechi) => [...reteteVechi, ...raspuns.retete]);
             seteazaCursor(raspuns.urmatorulCursor);
@@ -100,8 +101,7 @@ export default function ListaRetete({filtre, utilizator, mesajGol})
         {
             try
             {
-                const raspuns = await cerereApi('GET', construiesteCalea(filtre, null));
-
+                const raspuns = await cerereApi('GET', construiesteCalea(cale, filtre, null));
                 if(!ignora)
                 {
                     seteazaRetete(raspuns.retete);
@@ -130,7 +130,7 @@ export default function ListaRetete({filtre, utilizator, mesajGol})
         {
             ignora = true;
         };
-    }, [filtre]);
+    }, [cale, filtre]);
 
     useEffect(() =>
     {

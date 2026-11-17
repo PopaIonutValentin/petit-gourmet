@@ -53,6 +53,21 @@ const cautaFeed = db.prepare
     ORDER BY retete.id DESC
     LIMIT :limita
 `);
+const cautaReteteleAutorului = db.prepare
+(`
+    SELECT retete.id, retete.titlu, utilizatori.nume_utilizator AS autor,
+           retete.categorie_id, categorii.nume AS categorie, retete.vizibilitate,
+           retete.poza IS NOT NULL AS are_poza, retete.creat_la,
+           (SELECT ROUND(AVG(recenzii.nota), 1) FROM recenzii WHERE recenzii.reteta_id = retete.id) AS medie_stele,
+           (SELECT COUNT(*) FROM recenzii WHERE recenzii.reteta_id = retete.id) AS numar_recenzii
+    FROM retete
+    JOIN utilizatori ON utilizatori.id = retete.autor_id
+    LEFT JOIN categorii ON categorii.id = retete.categorie_id
+    WHERE retete.autor_id = :autorId
+      AND (:dupa IS NULL OR retete.id < :dupa)
+    ORDER BY retete.id DESC
+    LIMIT :limita
+`);
 const cautaPozeleAutorului = db.prepare('SELECT poza FROM retete WHERE autor_id = ? AND poza IS NOT NULL');
     
 
@@ -157,9 +172,18 @@ function listeazaFeed(filtre, limita)
         limita: limita
     });
 }
+function listeazaReteteleAutorului(autorId, dupa, limita)
+{
+    return cautaReteteleAutorului.all
+    ({
+        autorId: autorId,
+        dupa: dupa,
+        limita: limita
+    });
+}
 function listeazaPozeleAutorului(autorId)
 {
     return cautaPozeleAutorului.all(autorId).map((reteta) => reteta.poza);
 }
 
-module.exports = {creeazaReteta, gasesteReteta, gasesteProprietar, actualizeazaReteta, stergeReteta, seteazaPoza, listeazaPozeleFolosite, listeazaFeed, listeazaPozeleAutorului};
+module.exports = {creeazaReteta, gasesteReteta, gasesteProprietar, actualizeazaReteta, stergeReteta, seteazaPoza, listeazaPozeleFolosite, listeazaFeed, listeazaReteteleAutorului, listeazaPozeleAutorului};

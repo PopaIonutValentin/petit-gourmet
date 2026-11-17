@@ -10,6 +10,7 @@ import PaginaCautare from './pagini/PaginaCautare.jsx';
 import PopupCautare from './componente/PopupCautare.jsx';
 import PopupAdaugaReteta from './componente/PopupAdaugaReteta.jsx';
 import PopupReteta from './componente/PopupReteta.jsx';
+import PaginaProfil from './pagini/PaginaProfil.jsx';
 
 function PaginaNegasita()
 {
@@ -149,6 +150,7 @@ export default function App()
                 <Routes key={versiuneRetete}>
                     <Route path="/" element={<PaginaFeed utilizator={utilizator} />} />
                     <Route path="/cautare" element={<PaginaCautare utilizator={utilizator} laModificare={deschideCautarea} />} />
+                    <Route path="/profil" element={<PaginaProfil utilizator={utilizator} seVerifica={seVerifica} />} />
                     <Route path="/autentificare" element={<PaginaAutentificare laAutentificare={seteazaUtilizator} />} />
                     <Route path="/inregistrare" element={<PaginaInregistrare />} />
                     <Route path="*" element={<PaginaNegasita />} />
