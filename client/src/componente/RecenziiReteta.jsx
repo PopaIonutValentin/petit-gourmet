@@ -1,7 +1,8 @@
 import {useState, useEffect} from 'react';
 import {cerereApi} from '../api.js';
 import {Link} from 'react-router';
-import {CircleAlert, CircleCheck, Info, LogIn} from 'lucide-react';
+import {CircleAlert, CircleCheck, Info, LogIn, Pencil, Trash2} from 'lucide-react';
+import PopupConfirmare from './PopupConfirmare.jsx';
 
 export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizator, laIncarcareRecenzii})
 {
@@ -13,7 +14,9 @@ export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizat
     const [eroareFormular, seteazaEroareFormular] = useState('');
     const [seTrimite, seteazaSeTrimite] = useState(false);
     const [reincarcare, seteazaReincarcare] = useState(0);
-     
+    const [idRecenzieEditata, seteazaIdRecenzieEditata] = useState(null);
+    const [recenzieDeSters, seteazaRecenzieDeSters] = useState(null);
+
     useEffect(() =>
     {
         let ignora = false;
@@ -22,7 +25,7 @@ export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizat
         {
             try
             {
-                const raspuns = await cerereApi ('GET', '/retete/' + idReteta + '/recenzii');
+                const raspuns = await cerereApi('GET', '/retete/' + idReteta + '/recenzii');
 
                 if(!ignora)
                 {
@@ -43,7 +46,7 @@ export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizat
                 {
                     seteazaSeIncarca(false);
                 }
-            }   
+            }
         }
 
         citesteRecenziile();
@@ -56,7 +59,66 @@ export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizat
 
     const esteLogat = utilizator !== null;
     const esteAutorul = esteLogat && utilizator.id === idAutor;
+    const esteAdmin = esteLogat && utilizator.rol === 'admin';
     const aLasatDeja = esteLogat && recenzii.some((recenzie) => recenzie.autor === utilizator.nume_utilizator);
+    const seEditeaza = idRecenzieEditata !== null;
+
+    function esteRecenziaMea(recenzie)
+    {
+        return esteLogat && recenzie.autor === utilizator.nume_utilizator;
+    }
+
+    function incepeEditarea(recenzie)
+    {
+        seteazaEroareFormular('');
+        seteazaNota(recenzie.nota);
+        seteazaText(recenzie.continut);
+        seteazaIdRecenzieEditata(recenzie.id);
+    }
+
+    function anuleazaEditarea()
+    {
+        seteazaEroareFormular('');
+        seteazaNota(0);
+        seteazaText('');
+        seteazaIdRecenzieEditata(null);
+    }
+
+    function deschideStergerea(eveniment, idRecenzie)
+    {
+        const dreptunghi = eveniment.currentTarget.getBoundingClientRect();
+
+        seteazaRecenzieDeSters({
+            id: idRecenzie,
+            punct: {
+                x: dreptunghi.left + dreptunghi.width / 2,
+                y: dreptunghi.top + dreptunghi.height / 2
+            }
+        });
+    }
+
+    async function stergeRecenzia()
+    {
+        seteazaEroare('');
+
+        try
+        {
+            await cerereApi('DELETE', '/recenzii/' + recenzieDeSters.id);
+
+            if(recenzieDeSters.id === idRecenzieEditata)
+            {
+                anuleazaEditarea();
+            }
+
+            seteazaReincarcare((reincarcareVeche) => reincarcareVeche + 1);
+            return true;
+        }
+        catch (eroareCerere)
+        {
+            seteazaEroare(eroareCerere.message);
+            return false;
+        }
+    }
 
     async function trimiteRecenzia(eveniment)
     {
@@ -79,10 +141,19 @@ export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizat
 
         try
         {
-            await cerereApi('POST', '/retete/' + idReteta + '/recenzii', {nota: nota, continut: text});
+            if(seEditeaza)
+            {
+                await cerereApi('PUT', '/recenzii/' + idRecenzieEditata, {nota: nota, continut: text});
+            }
+            else
+            {
+                await cerereApi('POST', '/retete/' + idReteta + '/recenzii', {nota: nota, continut: text});
+            }
+
             seteazaNota(0);
             seteazaText('');
-            seteazaReincarcare(reincarcare + 1);
+            seteazaIdRecenzieEditata(null);
+            seteazaReincarcare((reincarcareVeche) => reincarcareVeche + 1);
         }
         catch (eroareCerere)
         {
@@ -111,7 +182,29 @@ export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizat
                                 aria-label={recenzie.nota + ' din 5 stele'}
                             >
                                 {'★'.repeat(recenzie.nota)}{'☆'.repeat(5 - recenzie.nota)}
-                            </span>    
+                            </span>
+                            {(esteRecenziaMea(recenzie) || esteAdmin) && (
+                                <div className="recenzie-actiuni">
+                                    {esteRecenziaMea(recenzie) && !estePrivata && (
+                                        <button
+                                            type="button"
+                                            className="recenzie-actiune"
+                                            aria-label="Editeaza recenzia"
+                                            onClick={() => incepeEditarea(recenzie)}
+                                        >
+                                            <Pencil aria-hidden="true" />
+                                        </button>
+                                    )}
+                                    <button
+                                        type="button"
+                                        className="recenzie-actiune recenzie-actiune-pericol"
+                                        aria-label="Sterge recenzia"
+                                        onClick={(eveniment) => deschideStergerea(eveniment, recenzie.id)}
+                                    >
+                                        <Trash2 aria-hidden="true" />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                         <p className="recenzie-text">{recenzie.continut}</p>
                     </li>
@@ -131,17 +224,17 @@ export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizat
                             <span>Nu iti poti lasa o recenzie la propria reteta.</span>
                         </p>
                     )}
-                    {esteLogat && !esteAutorul && aLasatDeja && (
+                    {esteLogat && !esteAutorul && aLasatDeja && !seEditeaza && (
                         <p className="recenzie-mesaj">
                             <CircleCheck aria-hidden="true" />
                             <span>Ai lasat deja o recenzie la aceasta reteta.</span>
                         </p>
                     )}
-                    {esteLogat && !esteAutorul && !aLasatDeja && (
+                    {esteLogat && !esteAutorul && (!aLasatDeja || seEditeaza) && (
                         <form onSubmit={trimiteRecenzia} noValidate>
                             <fieldset className="recenzie-nota">
-                                <legend>Nota ta (1-5 stele)</legend>
-                                {[1,2,3,4,5].map((valoare) => (
+                                <legend>{seEditeaza ? 'Modifica nota (1-5 stele)' : 'Nota ta (1-5 stele)'}</legend>
+                                {[1, 2, 3, 4, 5].map((valoare) => (
                                     <label key={valoare}>
                                         <input
                                             type="radio"
@@ -155,7 +248,7 @@ export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizat
                                     </label>
                                 ))}
                             </fieldset>
-                            <label htmlFor="textRecenzie">Recenzia ta</label>
+                            <label htmlFor="textRecenzie">{seEditeaza ? 'Modifica recenzia' : 'Recenzia ta'}</label>
                             <textarea
                                 id="textRecenzie"
                                 value={text}
@@ -164,6 +257,7 @@ export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizat
                                 minLength={3}
                                 maxLength={1000}
                                 rows={4}
+                                autoFocus={seEditeaza}
                             />
                             <div role="alert">
                                 {eroareFormular && (
@@ -173,12 +267,31 @@ export default function RecenziiReteta({idReteta, idAutor, estePrivata, utilizat
                                     </p>
                                 )}
                             </div>
-                            <button type="submit" disabled={seTrimite}>
-                                {seTrimite ? 'Se trimite...' : 'Trimite recenzia'}
-                            </button>    
+                            <div className="recenzie-formular-butoane">
+                                <button type="submit" disabled={seTrimite}>
+                                    {seTrimite ? 'Se trimite...' : (seEditeaza ? 'Salveaza modificarile' : 'Trimite recenzia')}
+                                </button>
+                                {seEditeaza && (
+                                    <button type="button" className="recenzie-anuleaza" onClick={anuleazaEditarea}>
+                                        Anuleaza
+                                    </button>
+                                )}
+                            </div>
                         </form>
                     )}
                 </div>
+            )}
+            {recenzieDeSters !== null && (
+                <PopupConfirmare
+                    titlu="Stergi recenzia?"
+                    mesaj="Recenzia va fi stearsa definitiv."
+                    textAnulare="Anuleaza"
+                    textConfirmare="Sterge"
+                    punctPornire={recenzieDeSters.punct}
+                    punctIesire={recenzieDeSters.punct}
+                    laConfirmare={stergeRecenzia}
+                    laInchidere={() => seteazaRecenzieDeSters(null)}
+                />
             )}
         </section>
     );

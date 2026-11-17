@@ -30,9 +30,14 @@ export default function PopupReteta({idReteta, pozitieCard, utilizator, laInchid
     const poateSterge = utilizator !== null && reteta !== null && (utilizator.id === reteta.autor_id || utilizator.rol === 'admin');
     const poateEdita = utilizator !== null && reteta !== null && utilizator.id === reteta.autor_id;
     
-    function laInchidereaFerestrei()
+        function laInchidereaFerestrei(eveniment)
     {
-        setTimeout(() => 
+        if(eveniment.target !== eveniment.currentTarget)
+        {
+            return;
+        }
+
+        setTimeout(() =>
         {
             if(stearsa.current)
             {
