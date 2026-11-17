@@ -361,7 +361,7 @@ export default function PopupAdaugaReteta({pozitieButon, reteta = null, laSalvar
         <>
             <dialog
                 ref={fereastra}
-                className="popup"
+                className={reteta !== null ? 'popup popup-editare' : 'popup'}
                 style={stilFereastra}
                 closedby="any"
                 aria-labelledby="titluAdaugare"
@@ -557,6 +557,7 @@ export default function PopupAdaugaReteta({pozitieButon, reteta = null, laSalvar
                     textAnulare="Continua editarea"
                     textConfirmare="Renunta"
                     punctPornire={punctConfirmare}
+                    punctIntoarcere={null}
                     punctIesire={punctButon}
                     laConfirmare={renuntaLaReteta}
                     laInchidere={() => seteazaConfirmareDeschisa(false)}

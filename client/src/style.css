@@ -1250,6 +1250,17 @@ h3
     cursor: pointer;
 }
 
+.popup-editare
+{
+    width: min(560px, calc(100% - 32px));
+    max-height: 75vh;
+}
+
+.popup-editare .popup-continut
+{
+    max-height: 75vh;
+}
+
 @media (max-width: 768px)
 {
     .meniu

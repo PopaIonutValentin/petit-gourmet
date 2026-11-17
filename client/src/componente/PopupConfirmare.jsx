@@ -3,13 +3,14 @@ import {flushSync} from 'react-dom';
 
 const DURATA_ANIMATIE = 300;
 
-export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirmare, punctPornire, punctIesire, laConfirmare, laInchidere})
+export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirmare, punctPornire, punctIntoarcere = punctPornire, punctIesire, laConfirmare, laInchidere})
 {
-    const fereastra = useRef(null);
     const [seConfirma, seteazaSeConfirma] = useState(false);
     const [seAsteapta, seteazaSeAsteapta] = useState(false);
+    const [seIntoarce, seteazaSeIntoarce] = useState(false);
+    const fereastra = useRef(null);
     const butonAnulare = useRef(null);
-    const punctAnimatie = seConfirma ? punctIesire : punctPornire;
+    const punctAnimatie = seConfirma ? punctIesire : (seIntoarce ? punctIntoarcere : punctPornire);
     const stilFereastra = punctAnimatie ? {
         '--deplasare-x': (punctAnimatie.x - window.innerWidth / 2) + 'px',
         '--deplasare-y': (punctAnimatie.y - window.innerHeight / 2) + 'px'
@@ -18,6 +19,20 @@ export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirma
     function laInchidereaFerestrei()
     {
         setTimeout(laInchidere, DURATA_ANIMATIE);
+    }
+
+    function pregatesteIntoarcerea()
+    {
+        flushSync(() =>
+        {
+            seteazaSeIntoarce(true);
+        });
+    }
+
+    function anuleaza()
+    {
+        pregatesteIntoarcerea();
+        fereastra.current.close();
     }
 
     async function confirma()
@@ -40,7 +55,7 @@ export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirma
         fereastra.current.close();
     }
 
-    useEffect(() => 
+    useEffect(() =>
     {
         if(!fereastra.current.open)
         {
@@ -55,9 +70,10 @@ export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirma
             className="popup popup-confirmare"
             style={stilFereastra}
             role="alertdialog"
-            closedby="any"
+            closedby="closerequest"
             aria-labelledby="titluConfirmare"
             aria-describedby="mesajConfirmare"
+            onCancel={pregatesteIntoarcerea}
             onClose={laInchidereaFerestrei}
         >
             <div className="popup-text">
@@ -68,7 +84,7 @@ export default function PopupConfirmare({titlu, mesaj, textAnulare, textConfirma
                         ref={butonAnulare}
                         type="button"
                         className="popup-confirmare-anulare"
-                        onClick={() => fereastra.current.close()}
+                        onClick={anuleaza}
                     >
                         {textAnulare}
                     </button>
