@@ -1399,6 +1399,62 @@ h3
     color: var(--culoare-text-secundar);
 }
 
+.admin-sectiune
+{
+    margin-bottom: 32px;
+    padding: 24px;
+    border-radius: 16px;
+    background-color: var(--culoare-card);
+    box-shadow: 0 2px 8px rgba(41, 31, 29, 0.08);
+}
+
+.admin-sectiune h2
+{
+    margin: 0 0 16px 0;
+}
+
+.admin-tabel-cutie
+{
+    overflow-x: auto;
+}
+
+.admin-tabel
+{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-tabel th,
+.admin-tabel td
+{
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--culoare-fundal);
+    text-align: left;
+}
+
+.admin-tabel th
+{
+    color: var(--culoare-text-secundar);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.admin-tabel td
+{
+    overflow-wrap: anywhere;
+}
+
+.admin-actiuni
+{
+    width: 1%;
+    text-align: right;
+}
+
+.admin-tabel .recenzie-actiune:hover
+{
+    background-color: var(--culoare-fundal);
+}
+
 @media (max-width: 768px)
 {
     .meniu
