@@ -1,6 +1,6 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {Navigate} from 'react-router';
-import {LoaderCircle, Trash2} from 'lucide-react';
+import {LoaderCircle, Plus, Trash2} from 'lucide-react';
 import {cerereApi} from '../api.js';
 import PopupConfirmare from '../componente/PopupConfirmare.jsx';
 
@@ -9,12 +9,45 @@ function formateazaData(text)
     return new Date(text.replace(' ', 'T') + 'Z').toLocaleDateString('ro-RO');
 }
 
+function textRetete(numar)
+{
+    if(numar === 1)
+    {
+        return '1 reteta';
+    }
+
+    if(numar >= 20 && (numar % 100 === 0 || numar % 100 >= 20))
+    {
+        return numar + ' de retete';
+    }
+
+    return numar + ' retete';
+}
+
+function punctulButonului(eveniment)
+{
+    const dreptunghi = eveniment.currentTarget.getBoundingClientRect();
+
+    return {
+        x: dreptunghi.left + dreptunghi.width / 2,
+        y: dreptunghi.top + dreptunghi.height / 2
+    };
+}
+
 export default function PaginaAdmin({utilizator, seVerifica})
 {
     const [utilizatori, seteazaUtilizatori] = useState([]);
     const [seIncarca, seteazaSeIncarca] = useState(true);
     const [eroare, seteazaEroare] = useState('');
     const [utilizatorDeSters, seteazaUtilizatorDeSters] = useState(null);
+    const [categorii, seteazaCategorii] = useState([]);
+    const [seIncarcaCategorii, seteazaSeIncarcaCategorii] = useState(true);
+    const [eroareCategorii, seteazaEroareCategorii] = useState('');
+    const [numeCategorie, seteazaNumeCategorie] = useState('');
+    const [eroareFormular, seteazaEroareFormular] = useState('');
+    const [seAdauga, seteazaSeAdauga] = useState(false);
+    const [categorieDeSters, seteazaCategorieDeSters] = useState(null);
+    const campCategorie = useRef(null);
     const esteAdmin = utilizator !== null && utilizator.rol === 'admin';
 
     useEffect(() =>
@@ -26,7 +59,7 @@ export default function PaginaAdmin({utilizator, seVerifica})
 
         let ignora = false;
 
-        async function citesteUtilizatorii() 
+        async function citesteUtilizatorii()
         {
             try
             {
@@ -53,7 +86,35 @@ export default function PaginaAdmin({utilizator, seVerifica})
             }
         }
 
+        async function citesteCategoriile()
+        {
+            try
+            {
+                const raspuns = await cerereApi('GET', '/admin/categorii');
+
+                if(!ignora)
+                {
+                    seteazaCategorii(raspuns.categorii);
+                }
+            }
+            catch (eroareCerere)
+            {
+                if(!ignora)
+                {
+                    seteazaEroareCategorii(eroareCerere.message);
+                }
+            }
+            finally
+            {
+                if(!ignora)
+                {
+                    seteazaSeIncarcaCategorii(false);
+                }
+            }
+        }
+
         citesteUtilizatorii();
+        citesteCategoriile();
 
         return () =>
         {
@@ -61,20 +122,7 @@ export default function PaginaAdmin({utilizator, seVerifica})
         };
     }, [esteAdmin]);
 
-    function deschideStergerea(eveniment, persoana)
-    {
-        const dreptunghi = eveniment.currentTarget.getBoundingClientRect();
-
-        seteazaUtilizatorDeSters({
-            persoana: persoana,
-            punct: {
-                x: dreptunghi.left + dreptunghi.width / 2,
-                y: dreptunghi.top + dreptunghi.height / 2
-            }
-        });
-    }
-
-    async function stergeUtilizatorul() 
+    async function stergeUtilizatorul()
     {
         const idDeSters = utilizatorDeSters.persoana.id;
 
@@ -89,6 +137,63 @@ export default function PaginaAdmin({utilizator, seVerifica})
         catch (eroareCerere)
         {
             seteazaEroare(eroareCerere.message);
+            return false;
+        }
+    }
+
+    async function adaugaCategoria(eveniment)
+    {
+        eveniment.preventDefault();
+        seteazaEroareFormular('');
+
+        const numeCurat = numeCategorie.trim();
+        const lungime = [...numeCurat].length;
+
+        if(lungime < 2 || lungime > 50)
+        {
+            seteazaEroareFormular('Numele categoriei trebuie sa aiba intre 2 si 50 de caractere.');
+            campCategorie.current.focus();
+            return;
+        }
+
+        seteazaSeAdauga(true);
+
+        try
+        {
+            const raspuns = await cerereApi('POST', '/admin/categorii', {nume: numeCurat});
+
+            seteazaCategorii((categoriiVechi) =>
+                [...categoriiVechi, {id: raspuns.id, nume: numeCurat, numar_retete: 0}]
+                    .sort((prima, aDoua) => prima.nume.localeCompare(aDoua.nume, 'ro'))
+            );
+            seteazaNumeCategorie('');
+        }
+        catch (eroareCerere)
+        {
+            seteazaEroareFormular(eroareCerere.message);
+        }
+        finally
+        {
+            seteazaSeAdauga(false);
+            campCategorie.current.focus();
+        }
+    }
+
+    async function stergeCategoria()
+    {
+        const idDeSters = categorieDeSters.categorie.id;
+
+        seteazaEroareCategorii('');
+
+        try
+        {
+            await cerereApi('DELETE', '/admin/categorii/' + idDeSters);
+            seteazaCategorii((categoriiVechi) => categoriiVechi.filter((categorie) => categorie.id !== idDeSters));
+            return true;
+        }
+        catch (eroareCerere)
+        {
+            seteazaEroareCategorii(eroareCerere.message);
             return false;
         }
     }
@@ -151,7 +256,7 @@ export default function PaginaAdmin({utilizator, seVerifica})
                                                     type="button"
                                                     className="recenzie-actiune recenzie-actiune-pericol"
                                                     aria-label={'Sterge utilizatorul ' + persoana.nume_utilizator}
-                                                    onClick={(eveniment) => deschideStergerea(eveniment, persoana)}
+                                                    onClick={(eveniment) => seteazaUtilizatorDeSters({persoana: persoana, punct: punctulButonului(eveniment)})}
                                                 >
                                                     <Trash2 aria-hidden="true" />
                                                 </button>
@@ -164,6 +269,53 @@ export default function PaginaAdmin({utilizator, seVerifica})
                     </div>
                 )}
             </section>
+            <section className="admin-sectiune" aria-labelledby="titluCategorii">
+                <h2 id="titluCategorii">Categorii</h2>
+                <form className="admin-formular" onSubmit={adaugaCategoria} noValidate>
+                    <label htmlFor="numeCategorie" className="admin-eticheta">Categorie noua</label>
+                    <div className="admin-formular-rand">
+                        <input
+                            ref={campCategorie}
+                            id="numeCategorie"
+                            type="text"
+                            maxLength={50}
+                            value={numeCategorie}
+                            onChange={(eveniment) => seteazaNumeCategorie(eveniment.target.value)}
+                            aria-invalid={eroareFormular !== ''}
+                            aria-describedby={eroareFormular !== '' ? 'eroareCategorie' : undefined}
+                        />
+                        <button type="submit" disabled={seAdauga}>
+                            <Plus aria-hidden="true" />
+                            {seAdauga ? 'Se adauga...' : 'Adauga'}
+                        </button>
+                    </div>
+                    {eroareFormular && <p id="eroareCategorie" role="alert" className="reteta-eroare-camp">{eroareFormular}</p>}
+                </form>
+                <p role="alert">{eroareCategorii}</p>
+                {seIncarcaCategorii ? (
+                    <p className="recenzie-mesaj">
+                        <LoaderCircle aria-hidden="true" className="feed-rotita" />
+                        Se incarca categoriile...
+                    </p>
+                ) : (
+                    <ul className="admin-categorii">
+                        {categorii.map((categorie) => (
+                            <li key={categorie.id} className="admin-categorie">
+                                <span className="admin-categorie-nume">{categorie.nume}</span>
+                                <span className="admin-categorie-numar">{textRetete(categorie.numar_retete)}</span>
+                                <button
+                                    type="button"
+                                    className="recenzie-actiune recenzie-actiune-pericol"
+                                    aria-label={'Sterge categoria ' + categorie.nume}
+                                    onClick={(eveniment) => seteazaCategorieDeSters({categorie: categorie, punct: punctulButonului(eveniment)})}
+                                >
+                                    <Trash2 aria-hidden="true" />
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </section>
             {utilizatorDeSters !== null && (
                 <PopupConfirmare
                     titlu={'Stergi utilizatorul ' + utilizatorDeSters.persoana.nume_utilizator + '?'}
@@ -173,6 +325,19 @@ export default function PaginaAdmin({utilizator, seVerifica})
                     punctPornire={utilizatorDeSters.punct}
                     laConfirmare={stergeUtilizatorul}
                     laInchidere={() => seteazaUtilizatorDeSters(null)}
+                />
+            )}
+            {categorieDeSters !== null && (
+                <PopupConfirmare
+                    titlu={'Stergi categoria ' + categorieDeSters.categorie.nume + '?'}
+                    mesaj={categorieDeSters.categorie.numar_retete > 0
+                        ? 'Retetele din ea (' + textRetete(categorieDeSters.categorie.numar_retete) + ') raman, dar fara categorie.'
+                        : 'Categoria nu are nicio reteta.'}
+                    textAnulare="Anuleaza"
+                    textConfirmare="Sterge"
+                    punctPornire={categorieDeSters.punct}
+                    laConfirmare={stergeCategoria}
+                    laInchidere={() => seteazaCategorieDeSters(null)}
                 />
             )}
         </>
