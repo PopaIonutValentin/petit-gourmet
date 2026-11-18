@@ -1,4 +1,5 @@
 const MESAJ_EROARE_GENERALA = 'A aparut o eroare. Incearca din nou.';
+const MESAJ_FARA_CONEXIUNE = 'Nu ma pot conecta la server. Verifica internetul si incearca din nou.';
 
 export async function cerereApi(metoda, cale, corp)
 {
@@ -14,7 +15,17 @@ export async function cerereApi(metoda, cale, corp)
         optiuni.body = JSON.stringify(corp);
     }
 
-    const raspuns = await fetch('/api' + cale, optiuni);
+    let raspuns;
+
+    try
+    {
+        raspuns = await fetch('/api' + cale, optiuni);
+    }
+    catch
+    {
+        throw new Error(MESAJ_FARA_CONEXIUNE);
+    }
+
     const date = await raspuns.json().catch(() => null);
 
     if(!raspuns.ok)

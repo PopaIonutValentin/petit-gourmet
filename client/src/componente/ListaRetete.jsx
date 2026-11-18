@@ -168,7 +168,7 @@ export default function ListaRetete({cale = '/retete', filtre, utilizator, mesaj
                     laStergere={scoateReteta}
                 />
             )}
-                       <p role="alert">{eroare}</p>
+            <p role="alert">{eroare}</p>
             {seIncarca && (
                 <div className="feed-incarcare">
                     <p className="recenzie-mesaj">

@@ -103,7 +103,7 @@ export default function PaginaCautare({utilizator, laModificare})
         };
     }, []);
 
-     return (
+    return (
         <>
             <h1>Cautare</h1>
             <p role="alert">{eroare}</p>

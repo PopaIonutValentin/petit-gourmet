@@ -79,7 +79,7 @@ router.post('/inregistrare', async (req, res) =>
 router.post('/login', async (req,res,next) =>
 {
     const { numeUtilizator, parola} = req.body ??{};
-   
+    
     if(typeof numeUtilizator !== 'string' || typeof parola !== 'string')
     {
         return res.status(400).json({ eroare: MESAJ_LOGIN_GRESIT});
@@ -176,7 +176,6 @@ router.delete('/eu', doarLogat, async (req, res, next) =>
 
     incercari.stergeIncercari('login_nume', cheieNume);
 
-    incercari.stergeIncercari('login_nume', cheieNume);
     await stergeContulCuPoze(req.utilizator.id);
 
     req.session.destroy((eroare) =>
