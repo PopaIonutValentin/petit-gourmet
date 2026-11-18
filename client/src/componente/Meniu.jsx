@@ -7,7 +7,7 @@ export default function Meniu({utilizator, seVerifica, laDeconectare, laCautare,
     const locatie = useLocation();
 
     return (
-        <nav className="meniu" aria-label="Meniul Principal">
+        <nav className="meniu" aria-label="Meniul principal">
             <img
                 src={logo}
                 alt="Petit Gourmet"
@@ -27,8 +27,8 @@ export default function Meniu({utilizator, seVerifica, laDeconectare, laCautare,
             >
                 <Search />
                 <span>Cautare</span>
-            </button> 
-            {!seVerifica && utilizator &&(
+            </button>
+            {!seVerifica && utilizator && (
                 <>
                     <button
                         type="button"
@@ -39,7 +39,6 @@ export default function Meniu({utilizator, seVerifica, laDeconectare, laCautare,
                         <SquarePlus />
                         <span>Adauga reteta</span>
                     </button>
-
                     <NavLink to="/profil" className="meniu-legatura">
                         <User />
                         <span>Profilul meu</span>
@@ -50,7 +49,12 @@ export default function Meniu({utilizator, seVerifica, laDeconectare, laCautare,
                             <span>Admin</span>
                         </NavLink>
                     )}
-                    <button type="button" className="meniu-legatura" onClick={laDeconectare}>
+                    <button
+                        type="button"
+                        className="meniu-legatura"
+                        aria-haspopup="dialog"
+                        onClick={(eveniment) => laDeconectare(eveniment.currentTarget.getBoundingClientRect())}
+                    >
                         <LogOut />
                         <span>Deconectare</span>
                     </button>
@@ -66,7 +70,6 @@ export default function Meniu({utilizator, seVerifica, laDeconectare, laCautare,
                         <UserPlus />
                         <span>Inregistrare</span>
                     </NavLink>
-
                 </>
             )}
         </nav>

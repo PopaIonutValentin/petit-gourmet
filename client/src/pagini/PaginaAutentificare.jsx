@@ -1,8 +1,10 @@
 import {useState} from 'react';
 import {Link, useNavigate} from 'react-router';
+import {ChefHat, CircleAlert, LogIn} from 'lucide-react';
 import {cerereApi} from '../api.js';
+import CampParola from '../componente/CampParola.jsx';
 
-export default function PaginaAutentificare({laAutentificare}) 
+export default function PaginaAutentificare({laAutentificare})
 {
     const [numeUtilizator, seteazaNumeUtilizator] = useState('');
     const [parola, seteazaParola] = useState('');
@@ -35,33 +37,45 @@ export default function PaginaAutentificare({laAutentificare})
     }
 
     return (
-        <main>
-            <h1>Autentificare</h1>
-            <p role="alert">{eroare}</p>
-            <form onSubmit={trimiteFormularul}>
-                <label htmlFor="numeUtilizator">Nume de utilizator</label>
-                <input
-                    id="numeUtilizator"
-                    type="text"
-                    autoComplete="username"
-                    required
-                    value={numeUtilizator}
-                    onChange={(eveniment) => seteazaNumeUtilizator(eveniment.target.value)}
-                />
-                <label htmlFor="parola">Parola</label>
-                <input
-                    id="parola"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    value={parola}
-                    onChange={(eveniment) => seteazaParola(eveniment.target.value)}
-                />
-                <button type="submit" disabled={seTrimite}>
-                    {seTrimite ? 'Se verifica...' : 'Autentificare'}
-                </button>
-            </form>
-            <p>Nu ai cont? <Link to="/inregistrare">Creeaza unul</Link></p>
-        </main>
+        <div className="cont-pagina">
+            <section className="cont-card" aria-labelledby="titluAutentificare">
+                <div className="cont-iconita">
+                    <ChefHat aria-hidden="true" />
+                </div>
+                <h1 id="titluAutentificare">Bine ai revenit</h1>
+                <p className="cont-subtitlu">Intra in cont ca sa adaugi retete.</p>
+                <div role="alert">
+                    {eroare && (
+                        <p className="cont-eroare">
+                            <CircleAlert aria-hidden="true" />
+                            {eroare}
+                        </p>
+                    )}
+                </div>
+                <form className="cont-formular" onSubmit={trimiteFormularul}>
+                    <label htmlFor="numeUtilizator">Nume de utilizator</label>
+                    <input
+                        id="numeUtilizator"
+                        type="text"
+                        autoComplete="username"
+                        required
+                        value={numeUtilizator}
+                        onChange={(eveniment) => seteazaNumeUtilizator(eveniment.target.value)}
+                    />
+                    <label htmlFor="parola">Parola</label>
+                    <CampParola
+                        id="parola"
+                        autoComplete="current-password"
+                        valoare={parola}
+                        laSchimbare={seteazaParola}
+                    />
+                    <button type="submit" className="cont-buton" disabled={seTrimite}>
+                        <LogIn aria-hidden="true" />
+                        {seTrimite ? 'Se verifica...' : 'Autentificare'}
+                    </button>
+                </form>
+                <p className="cont-alternativa">Nu ai cont? <Link to="/inregistrare">Creeaza unul</Link></p>
+            </section>
+        </div>
     );
 }

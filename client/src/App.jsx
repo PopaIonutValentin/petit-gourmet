@@ -10,6 +10,7 @@ import PaginaCautare from './pagini/PaginaCautare.jsx';
 import PopupCautare from './componente/PopupCautare.jsx';
 import PopupAdaugaReteta from './componente/PopupAdaugaReteta.jsx';
 import PopupReteta from './componente/PopupReteta.jsx';
+import PopupConfirmare from './componente/PopupConfirmare.jsx';
 import PaginaProfil from './pagini/PaginaProfil.jsx';
 import PaginaAdmin from './pagini/PaginaAdmin.jsx';
 
@@ -23,6 +24,7 @@ export default function App()
     const [utilizator, seteazaUtilizator] = useState(null);
     const [seVerifica, seteazaSeVerifica] = useState(true);
     const [eroareDeconectare, seteazaEroareDeconectare] = useState('');
+    const [punctDeconectare, seteazaPunctDeconectare] = useState(null);
     const [cautareDeschisa, seteazaCautareDeschisa] = useState(false);
     const [pozitieCautare, seteazaPozitieCautare] = useState(null);
     const [popupDoarCategorii, seteazaPopupDoarCategorii] = useState(false);
@@ -67,9 +69,17 @@ export default function App()
 
         return () =>
         {
-            ignora=true;
+            ignora = true;
         };
     }, []);
+
+    function deschideDeconectarea(dreptunghiButon)
+    {
+        seteazaPunctDeconectare({
+            x: dreptunghiButon.left + dreptunghiButon.width / 2,
+            y: dreptunghiButon.top + dreptunghiButon.height / 2
+        });
+    }
 
     async function deconecteaza()
     {
@@ -80,10 +90,12 @@ export default function App()
             await cerereApi('POST', '/logout');
             seteazaUtilizator(null);
             navigheaza('/autentificare');
+            return true;
         }
         catch (eroareCerere)
         {
             seteazaEroareDeconectare(eroareCerere.message);
+            return false;
         }
     }
 
@@ -126,7 +138,7 @@ export default function App()
             <Meniu
                 utilizator={utilizator}
                 seVerifica={seVerifica}
-                laDeconectare={deconecteaza}
+                laDeconectare={deschideDeconectarea}
                 laCautare={deschideCautarea}
                 laAdaugare={deschideAdaugarea}
             />
@@ -150,6 +162,17 @@ export default function App()
                     pozitieCard={null}
                     utilizator={utilizator}
                     laInchidere={inchideRetetaNoua}
+                />
+            )}
+            {punctDeconectare !== null && (
+                <PopupConfirmare
+                    titlu="Te deconectezi?"
+                    mesaj="Ca sa adaugi sau sa editezi retete va trebui sa te autentifici din nou."
+                    textAnulare="Ramai conectat"
+                    textConfirmare="Deconecteaza-ma"
+                    punctPornire={punctDeconectare}
+                    laConfirmare={deconecteaza}
+                    laInchidere={() => seteazaPunctDeconectare(null)}
                 />
             )}
             <main className="continut">
